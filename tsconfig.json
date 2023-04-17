@@ -1,0 +1,31 @@
+{
+  // ts-node 옵션
+  "ts-node": {
+		"files":true,
+    "compilerOptions": {
+      
+    }
+  },
+  // tsc 옵션
+  "compilerOptions": {
+    "target": "es6", // 컴파일된 결과가 es6
+    "module": "commonjs", // 컴파일된 결과가 commonjs,
+    "outDir": "dist", // 컴파일된 결과물
+    "lib": ["ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+
+    "allowJs": true,
+    "noImplicitAny": true, //any타입 금지 여부
+    "esModuleInterop": true, // if false , import * as redis from 'redis'
+    "noUnusedLocals": false, //쓰지않는 지역변수 있으면 에러내기
+    "noUnusedParameters": false //쓰지않는 파라미터 있으면 에러내기,
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
