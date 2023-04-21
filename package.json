@@ -9,12 +9,22 @@
     "dev": "nodemon"
   },
   "dependencies": {
+    "@apollo/server": "^4.6.0",
+    "apollo-server-express": "^3.12.0",
     "dotenv": "^16.0.3",
-    "openai": "^3.2.1"
+    "graphql": "^16.6.0",
+    "mysql2": "^3.2.3",
+    "openai": "^3.2.1",
+    "sequelize": "^6.31.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
+    "sequelize-cli": "^6.6.0",
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.5",
     "tsconfig-paths": "^4.2.0",

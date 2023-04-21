@@ -1,0 +1,23 @@
+version: "3"
+services:
+  hci:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3030:3030"
+    volumes:
+      - .:/usr/src/app
+  db:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=outSourcing123!
+      - MYSQL_DATABASE=hci-dev
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=outSourcing123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
