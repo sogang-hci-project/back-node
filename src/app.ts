@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 
 import db from "~/models";
+import { getPaintingInfo } from "./controllers";
 // import { runAPI } from "~/api/openai";
 
 const app = express();
@@ -12,10 +13,11 @@ const port = app.get("port");
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// 테스트 GET 라우터
 app.get("/", (req: any, res: any) => {
   res.send(`서버 연결 성공: ${req.protocol}, ${process.env.NODE_ENV}`);
 });
+
+app.get("/request", getPaintingInfo);
 
 // 에러처리 미들웨어
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {

@@ -1,15 +1,13 @@
 export { default as sequelize } from "./sequelize";
-export { default as User } from "./user";
+export { default as Painting } from "./painting";
 
 import sequelize from "./sequelize";
-import User, { associate as UserAssociate } from "./user";
+import Painting from "./painting";
 
 const db = {
   sequelize,
-  User,
+  Painting,
 };
-
-UserAssociate(db);
 
 export type dbType = typeof db;
 
