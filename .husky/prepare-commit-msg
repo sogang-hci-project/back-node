@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Automatically adds branch name to every commit message.
+
+COMMIT_MSG_FILE=$1
+
+BRANCH_NAME=`git rev-parse --abbrev-ref HEAD`
+FIRST_LINE=`head -n1 ${COMMIT_MSG_FILE}`
+echo '['$BRANCH_NAME'] '$FIRST_LINE > $1

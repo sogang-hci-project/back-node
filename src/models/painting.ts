@@ -1,36 +1,40 @@
 import { dbType } from "./index";
-import { Model, DataTypes, BelongsToManyGetAssociationsMixin } from "sequelize";
+import { Model, DataTypes } from "sequelize";
 import sequelize from "./sequelize";
 
-class User extends Model {
+class Painting extends Model {
   public readonly id!: number;
   public name: string;
-  public email: string;
-  public password: string;
+  public author: string;
+  public year: string;
+  public description: string;
   public readonly createAt!: Date;
   public readonly updatedAt!: Date;
-  public getContentMeta!: BelongsToManyGetAssociationsMixin<User>;
 }
 
-User.init(
+Painting.init(
   {
     name: {
       type: DataTypes.STRING(30),
       allowNull: false,
     },
-    email: {
-      type: DataTypes.STRING(50),
+    author: {
+      type: DataTypes.STRING(30),
       allowNull: false,
     },
-    password: {
-      type: DataTypes.STRING(100),
+    year: {
+      type: DataTypes.STRING(30),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
   },
   {
     sequelize,
-    modelName: "User",
-    tableName: "users",
+    modelName: "Painting",
+    tableName: "paintings",
     charset: "utf8mb4",
     collate: "utf8mb4_general_ci",
   }
@@ -38,4 +42,4 @@ User.init(
 
 export const associate = (db: dbType) => {};
 
-export default User;
+export default Painting;

@@ -6,13 +6,17 @@
   "scripts": {
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/app.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "npm run lint"
+    ]
   },
   "dependencies": {
     "@apollo/server": "^4.6.0",
-    "apollo-server-express": "^3.12.0",
     "dotenv": "^16.0.3",
-    "graphql": "^16.6.0",
     "mysql2": "^3.2.3",
     "openai": "^3.2.1",
     "sequelize": "^6.31.0"
@@ -22,6 +26,8 @@
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.7",
     "sequelize-cli": "^6.6.0",
