@@ -8,3 +8,7 @@
 $ yarn
 $ docker-compose up --build
 ```
+
+```bash
+npm run start:pm2
+```
