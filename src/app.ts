@@ -1,9 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
+import morgan from "morgan";
+import cors from "cors";
 
 import db from "~/models";
 import { postPaintingInfo } from "./controllers";
-import cors from "cors";
 const app = express();
+const isProd = process.env.NODE_ENV === "production";
 
 app.set("port", 3030);
 const port = app.get("port");
@@ -13,8 +15,13 @@ var corsOptions = {
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-app.use(cors(corsOptions));
+if (isProd) {
+  app.use(morgan("combined"));
+} else {
+  app.use(morgan("dev"));
+}
 
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 

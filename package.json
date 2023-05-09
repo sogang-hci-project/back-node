@@ -8,6 +8,7 @@
     "start": "node dist/app.js",
     "dev": "nodemon",
     "prepare": "husky install",
+    "start:pm2": "pm2 start ecosystem.config.js --env production",
     "lint": "tsc --noEmit && eslint src/**/*.ts --cache",
     "lint:fix": "eslint src/**/*.ts --fix"
   },
@@ -22,11 +23,13 @@
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "morgan": "^1.10.0",
     "mysql2": "^3.2.3",
     "openai": "^3.2.1",
     "sequelize": "^6.31.0"
   },
   "devDependencies": {
+    "@types/morgan": "^1.9.4",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
