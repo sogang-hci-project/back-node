@@ -18,7 +18,9 @@
   },
   "dependencies": {
     "@apollo/server": "^4.6.0",
+    "@types/cors": "^2.8.13",
     "axios": "^1.4.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "mysql2": "^3.2.3",
     "openai": "^3.2.1",
