@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const redisStore = new RedisStore({ client: redisClient });
-// const maxAge = 1000 * 60 * 60 * 12; // 12h
-const maxAge = 1000 * 30; // 30s
+const maxAge = 1000 * 60 * 60 * 12; // 12h
+// const maxAge = 1000 * 30; // 30s
 
 export const isProd = process.env.NODE_ENV === "production";
 export const corsOptions = {
