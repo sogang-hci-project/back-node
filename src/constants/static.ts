@@ -1,5 +1,9 @@
 export default {
-  what: ` VTS(Visual Thinking Strategies)는 인지심리학자 하우젠(Abigail Housen)과 MoMA의
-  미술관 에듀케이터 (Director of Education)였던 예나윈(Philip Yenawine)에 의해 개발된 질문 기반
-  교수법입니다.`,
+  what: `Visual Thinking Strategies (VTS) is a question-based methodology developed by cognitive psychologist Abigail Housen and MoMA's
+  Philip Yenawine, formerly the Director of Education at MoMA.
+  teaching methodology.`,
+  first: "What's going on in this picture?",
+  second: "What did you see that made you say that?",
+  third: "What else can you find?",
+  evaluate: "All VTS sessions have ended. Please rate your VTS session.",
 };

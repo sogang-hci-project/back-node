@@ -7,8 +7,8 @@ class Message extends Model {
   public type: string;
   public free: boolean;
   public stage: string;
-  public question: string;
-  public answer: string;
+  public user: string;
+  public agent: string;
   public source: string;
   public relevantSource: string;
   public readonly createAt!: Date;
@@ -29,11 +29,11 @@ Message.init(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    question: {
+    user: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    answer: {
+    agent: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
