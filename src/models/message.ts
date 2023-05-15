@@ -7,7 +7,10 @@ class Message extends Model {
   public type: string;
   public free: boolean;
   public stage: string;
-  public chat: string;
+  public question: string;
+  public answer: string;
+  public source: string;
+  public relevantSource: string;
   public readonly createAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -26,8 +29,20 @@ Message.init(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    chat: {
+    question: {
       type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    answer: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    source: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+    },
+    relevantSources: {
+      type: DataTypes.STRING(500),
       allowNull: false,
     },
   },
