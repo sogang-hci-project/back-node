@@ -20,17 +20,23 @@
   "dependencies": {
     "@apollo/server": "^4.6.0",
     "@types/cors": "^2.8.13",
+    "@types/express-session": "^1.17.7",
     "axios": "^1.4.0",
+    "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "express-session": "^1.17.3",
+    "ioredis": "^5.3.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.2.3",
     "openai": "^3.2.1",
-    "sequelize": "^6.31.0"
+    "sequelize": "^6.31.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.15.11",
+    "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "eslint": "^8.40.0",
