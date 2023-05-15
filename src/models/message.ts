@@ -5,8 +5,9 @@ import sequelize from "./sequelize";
 class Message extends Model {
   public readonly id!: number;
   public type: string;
-  public request: string;
-  public response: string;
+  public free: boolean;
+  public stage: string;
+  public chat: string;
   public readonly createAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -14,14 +15,18 @@ class Message extends Model {
 Message.init(
   {
     type: {
+      type: DataTypes.ENUM("dynamic", "static"),
+      allowNull: false,
+    },
+    free: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    stage: {
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    request: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    response: {
+    chat: {
       type: DataTypes.TEXT,
       allowNull: false,
     },

@@ -3,24 +3,33 @@ import session from "express-session";
 import { User } from "~/models";
 import { redisClient } from "~/lib/redis";
 
-interface UserSession extends session.Session {
+export interface UserSession extends session.Session {
   user: {
-    stage: string;
-    init: boolean;
+    currentStage: string;
+    nextStage: string;
   };
 }
+
+/**
+ * GET controller for session init
+ * @param req {Request} HTTP request
+ * @param res {Response} HTTP response
+ * @param next {NextFunction} error handling
+ */
 
 export const getInitSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
     const sessionId = `sess:${req.sessionID}`;
-    console.log(sessionId);
+    const currentStage = "/session/init";
+    const nextStage = "/session/greeting";
     const alreadyInit = await redisClient.get(sessionId);
-    if (alreadyInit) return res.status(400).json({ message: "session already init" });
+    if (alreadyInit)
+      return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
 
-    await User.create({ sessionId, stage: "init" });
-    session.user = { stage: "init", init: true };
-    return res.status(200).json({ message: "success session init" });
+    await User.create({ sessionId });
+    session.user = { currentStage, nextStage };
+    return res.status(200).json({ message: "success session init", currentStage, nextStage });
   } catch (e) {
     next(e);
   }

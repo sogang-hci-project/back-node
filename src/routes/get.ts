@@ -3,6 +3,6 @@ import { getInitSession } from "~/controllers";
 
 const getRouter = express.Router();
 
-getRouter.get("/init", getInitSession);
+getRouter.get("/session/init", getInitSession);
 
 export default getRouter;

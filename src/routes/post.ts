@@ -1,8 +1,9 @@
 import express from "express";
-import { postPaintingInfo } from "~/controllers";
+import { postSessionGreeting } from "~/controllers";
+import { isSessionInit } from "~/lib/middlewares";
 
 const postRouter = express.Router();
 
-postRouter.post("/vts", postPaintingInfo);
+postRouter.post("/session/greeting", isSessionInit, postSessionGreeting);
 
 export default postRouter;

@@ -1,4 +1,2 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-export const FLASK_SERVER = process.env.FLASK_SERVER;
+export * from "./env";
+export { default as VTS } from "./static";
