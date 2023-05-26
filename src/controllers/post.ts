@@ -5,6 +5,7 @@ import { UserSession } from "~/controllers/get";
 import { LLM_SERVER } from "~/constants";
 import { Message } from "~/models";
 import VTS from "~/constants/static";
+import { redisClient } from "~/lib/redis";
 
 interface IData {
   user: string;
@@ -58,10 +59,6 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
 /**
  * VTS Introduce and VTS agree
  * do not use LLM model
- * @param req
- * @param res
- * @param next
- * @returns
  */
 
 export const postVTSInit = async (req: Request, res: Response, next: NextFunction) => {
@@ -69,7 +66,6 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     const session = req.session as UserSession;
     const additionalCheck = session.user.initAdditional;
     const doneCheck = session.user.initDone;
-    console.log(doneCheck, !doneCheck);
     const sessionId = `${req.sessionID}`;
     const { user } = req.body;
     let additional;
@@ -96,7 +92,13 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         type: "static",
         UserSessionId: sessionId,
       });
+
+      let context = await redisClient.get(sessionId);
+      context += `${user}, ${agent}`;
+      redisClient.set(sessionId, context);
+
       session.user.initAdditional = true;
+
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
         user,
@@ -120,7 +122,13 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         type: "static",
         UserSessionId: sessionId,
       });
+
+      let context = await redisClient.get(sessionId);
+      context += `${user}, ${agent}`;
+      redisClient.set(sessionId, context);
+
       session.user.initDone = true;
+
       return res.status(200).json({
         message: "vts init, reply for first vts question",
         user,
@@ -149,7 +157,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
 export const postVTSFirst = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const UserSessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
     let { user } = req.body;
     let additional;
     if (req.query.additional === "true") additional = true;
@@ -185,7 +193,7 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       relevantSources,
       stage: currentStage,
       type: "dynamic",
-      UserSessionId,
+      UserSessionId: sessionId,
     });
 
     session.user.currentStage = currentStage;
