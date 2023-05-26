@@ -22,23 +22,18 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
   try {
     const session = req.session as UserSession;
     const check = session.user.sessionGreeting;
-    // console.log(req.sessionID);
-    // if (check) {
-    //   const nextStage = session.user.nextStage;
-    //   return res
-    //     .status(400)
-    //     .json({ message: `greeting sesison already done. you shoud go to ${nextStage}`, nextStage });
-    // }
-
-    // const UserSessionId = `sess:${req.sessionID}`;
-    const sessionId = `${req.sessionID}`;
     const user = req.body.user;
+    if (check) {
+      const nextStage = session.user.nextStage;
+      return res.status(400).json({ message: `greeting sesison already done`, nextStage });
+    }
     if (!user) return res.status(400).json({ message: "incorrect API data" });
+    const sessionId = `${req.sessionID}`;
     const currentStage = "/session/greeting";
     const nextStage = `/vts/init?additional=true`;
 
     const data: IData = { user, sessionId };
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/test`, data);
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk-with-free`, data);
     const agent = result.data.text;
 
     await Message.create({
