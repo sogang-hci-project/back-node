@@ -25,7 +25,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     const user = req.body.user;
     if (check) {
       const nextStage = session.user.nextStage;
-      return res.status(400).json({ message: `greeting sesison already done`, nextStage });
+      return res.status(400).json({ message: `already done`, nextStage });
     }
     if (!user) return res.status(400).json({ message: "incorrect API data" });
     const sessionId = `${req.sessionID}`;
@@ -57,6 +57,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
 
 /**
  * VTS Introduce and VTS agree
+ * do not use LLM model
  * @param req
  * @param res
  * @param next
@@ -66,7 +67,9 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
 export const postVTSInit = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const UserSessionId = `sess:${req.sessionID}`;
+    const additionalCheck = session.user.initAdditional;
+    const doneCheck = session.user.initDone;
+    console.log(doneCheck, !doneCheck);
     const sessionId = `${req.sessionID}`;
     const { user } = req.body;
     let additional;
@@ -76,10 +79,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     if (!user) return res.status(400).json({ message: "incorrect data" });
     const currentStage = `/vts/init?additional=${additional}`;
     const nextStage = additional ? `/vts/init?additional=${!additional}` : `/vts/first?additional=${!additional}`;
+    if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
+    if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
-    const data: IData = { user, sessionId };
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
-    const agent = result.data.text;
+    const agent = VTS.what;
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
@@ -91,8 +94,9 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         free: false,
         stage: currentStage,
         type: "static",
-        UserSessionId,
+        UserSessionId: sessionId,
       });
+      session.user.initAdditional = true;
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
         user,
@@ -113,9 +117,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         free: false,
         relevantSources,
         stage: currentStage,
-        type: "dynamic",
-        UserSessionId,
+        type: "static",
+        UserSessionId: sessionId,
       });
+      session.user.initDone = true;
       return res.status(200).json({
         message: "vts init, reply for first vts question",
         user,

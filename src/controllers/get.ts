@@ -9,6 +9,8 @@ export interface UserSession extends session.Session {
     nextStage: string;
     next?: boolean;
     sessionGreeting?: boolean;
+    initAdditional?: boolean;
+    initDone?: boolean;
   };
 }
 
