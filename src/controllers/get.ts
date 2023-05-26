@@ -11,6 +11,12 @@ export interface UserSession extends session.Session {
     sessionGreeting?: boolean;
     initAdditional?: boolean;
     initDone?: boolean;
+    firstAdditional?: boolean;
+    firstDone?: boolean;
+    secondAdditional?: boolean;
+    secondDone?: boolean;
+    thirdAdditional?: boolean;
+    thirdDone?: boolean;
   };
 }
 
