@@ -2,9 +2,14 @@ import axios, { AxiosResponse } from "axios";
 import { Request, Response, NextFunction } from "express";
 
 import { UserSession } from "~/controllers/get";
-import { FLASK_SERVER } from "~/constants";
+import { LLM_SERVER } from "~/constants";
 import { Message } from "~/models";
 import VTS from "~/constants/static";
+
+interface IData {
+  user: string;
+  sessionId?: string;
+}
 
 /**
  * POST controller after session init
@@ -13,43 +18,43 @@ import VTS from "~/constants/static";
  * @param next {NextFunction} error handling
  */
 
-interface IData {
-  user: string;
-  header: { additional?: boolean; end?: boolean; qna?: boolean };
-}
-
 export const postSessionGreeting = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const UserSessionId = `sess:${req.sessionID}`;
+    const check = session.user.sessionGreeting;
+    // console.log(req.sessionID);
+    // if (check) {
+    //   const nextStage = session.user.nextStage;
+    //   return res
+    //     .status(400)
+    //     .json({ message: `greeting sesison already done. you shoud go to ${nextStage}`, nextStage });
+    // }
+
+    // const UserSessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
     const user = req.body.user;
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+    if (!user) return res.status(400).json({ message: "incorrect API data" });
     const currentStage = "/session/greeting";
     const nextStage = `/vts/init?additional=true`;
-    const data: IData = { user, header: { additional: false } };
 
-    const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
+    const data: IData = { user, sessionId };
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/test`, data);
+    const agent = result.data.text;
 
-    const agent = result.data.contents.answer;
-    const source = result.data.contents.source;
-    const relevantSources = JSON.stringify(result.data.contents.relevantSources);
     await Message.create({
       user,
       agent,
-      source,
-      relevantSources,
-      free: false,
+      free: true,
       stage: currentStage,
       type: "dynamic",
-      UserSessionId,
+      UserSessionId: sessionId,
     });
-
+    const contents = result.data;
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
+    session.user.sessionGreeting = true;
 
-    return res
-      .status(200)
-      .json({ message: "greeting success", user, agent, source, relevantSources, currentStage, nextStage });
+    return res.status(200).json({ message: "greeting success", user, currentStage, nextStage, contents });
   } catch (e) {
     next(e);
   }
@@ -67,6 +72,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
   try {
     const session = req.session as UserSession;
     const UserSessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
     const { user } = req.body;
     let additional;
     if (req.query.additional === "true") additional = true;
@@ -76,17 +82,18 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     const currentStage = `/vts/init?additional=${additional}`;
     const nextStage = additional ? `/vts/init?additional=${!additional}` : `/vts/first?additional=${!additional}`;
 
+    const data: IData = { user, sessionId };
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
+    const agent = result.data.text;
+
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
 
     if (additional) {
-      const agent = VTS.what;
       await Message.create({
         user,
         agent,
-        source: "static",
         free: false,
-        relevantSources: "static",
         stage: currentStage,
         type: "static",
         UserSessionId,
@@ -101,10 +108,6 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         nextStage,
       });
     } else {
-      /**
-        TODO : 자연어 처리 로직 추가 
-      */
-      // const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
       const agent = "thank you for agreeing";
       const source = "static";
       const relevantSources = "static";
@@ -122,7 +125,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         message: "vts init, reply for first vts question",
         user,
         agent,
-        first: VTS.first,
+        VTS_FIRST: VTS.first,
         source: "static",
         relevantSources: "static",
         currentStage,
@@ -155,16 +158,21 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     if (!user) return res.status(400).json({ message: "incorrect data" });
     const currentStage = `/vts/first?additional=${additional}`;
     const nextStage = additional ? `/vts/first?additional=${!additional}` : `/vts/second?additional=${!additional}`;
+    const data: IData = { user };
+    let result: AxiosResponse;
+    if (additional) {
+      // if (additional) {
+      // } else {
+      //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
+      // }
+      user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. And create one additional question for it. \n ${user}`;
+      result = await axios.post(`${LLM_SERVER}/talk?ADDITIONAL=ADDITIONAL`, data);
+    } else {
+      result = await axios.post(`${LLM_SERVER}/talk?NEXT=NEXT`, data);
+    }
 
-    // if (additional) {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. And create one additional question for it. \n ${user}`;
-    // } else {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
-    // }
-    const data: IData = { user, header: { additional } };
-
-    const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
-
+    // const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
+    console.log("테스트 중입니다. 🔥🔥🔥🔥", result.data.contents);
     const agent = result.data.contents.answer;
     const source = result.data.contents.source;
     const relevantSources = JSON.stringify(result.data.contents.relevantSources);
@@ -190,7 +198,7 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       user,
       agent,
       source,
-      second: !additional && VTS.second,
+      VTS_SECOND: !additional && VTS.second,
       relevantSources,
       currentStage,
       nextStage,
@@ -218,9 +226,9 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     // } else {
     //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
     // }
-    const data: IData = { user, header: { additional } };
+    const data: IData = { user };
 
-    const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
 
     const agent = result.data.contents.answer;
     const source = result.data.contents.source;
@@ -245,7 +253,7 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
       user,
       agent,
       source,
-      third: !additional && VTS.third,
+      VTS_THIRD: !additional && VTS.third,
       relevantSources,
       currentStage,
       nextStage,
@@ -273,9 +281,9 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     // } else {
     //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
     // }
-    const data: IData = { user, header: { additional } };
+    const data: IData = { user };
 
-    const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
 
     const agent = result.data.contents.answer;
     const source = result.data.contents.source;
@@ -300,7 +308,7 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
       user,
       agent,
       source,
-      end: !additional && VTS.evaluate,
+      VTS_EVALUATE: !additional && VTS.evaluate,
       relevantSources,
       currentStage,
       nextStage,
@@ -378,9 +386,9 @@ export const postQNA = async (req: Request, res: Response, next: NextFunction) =
     //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
     // }
 
-    const data: IData = { user, header: { additional } };
+    const data: IData = { user };
 
-    const result: AxiosResponse = await axios.post(`${FLASK_SERVER}/talk`, data);
+    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
 
     const agent = result.data.contents.answer;
     const source = result.data.contents.source;

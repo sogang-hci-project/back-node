@@ -7,6 +7,8 @@ export interface UserSession extends session.Session {
   user: {
     currentStage: string;
     nextStage: string;
+    next?: boolean;
+    sessionGreeting?: boolean;
   };
 }
 
@@ -20,13 +22,13 @@ export interface UserSession extends session.Session {
 export const getInitSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const sessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
     const currentStage = "/session/init";
     const nextStage = "/session/greeting";
-    const alreadyInit = await redisClient.get(sessionId);
+    //'sess' means session
+    const alreadyInit = await redisClient.get(`sess:${sessionId}`);
     if (alreadyInit)
       return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
-
     await User.create({ sessionId });
     session.user = { currentStage, nextStage };
     return res.status(200).json({ message: "success session init", currentStage, nextStage });
