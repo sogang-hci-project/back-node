@@ -40,7 +40,8 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
       return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
     await User.create({ sessionId });
     session.user = { currentStage, nextStage };
-
+    console.log("session", session);
+    console.log("session 유저", session.user);
     return res
       .status(200)
       .cookie(process.env.SESSION_NAME, `s:${sessionId}`, {
