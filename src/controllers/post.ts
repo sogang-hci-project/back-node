@@ -131,7 +131,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       });
 
       let context = JSON.parse(await redisClient.get(sessionId));
-      const chat = { id: context.length + 1, human: user, ai: VTS.first };
+      const chat = { id: context.length + 1, human: user, ai: `${agent} ${VTS.first}` };
       context.push(chat);
       redisClient.set(sessionId, JSON.stringify(context));
 
@@ -187,7 +187,10 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
 
     const data: IData = { user, sessionId };
     if (additional) data.additional = true;
-    else data.additional = false;
+    else {
+      data.additional = false;
+      user = `The answer to your question is ${user}`;
+    }
     const result = await axios.post(`${LLM_SERVER}/talk`, data);
 
     const agent = result.data?.text;
@@ -253,8 +256,10 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     // if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
     const data: IData = { user, sessionId };
+    user = `The answer to your question is ${user}`;
     if (additional) data.additional = true;
     else data.additional = false;
+
     const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
     const agent = result.data?.text;
     const quiz = result.data?.quiz;
@@ -314,16 +319,13 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     //인증
     const currentStage = `/vts/third?additional=${additional}`;
     const nextStage = additional ? `/vts/third?additional=${!additional}` : `/vts/end`;
-    if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
-    if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
     const data: IData = { user, sessionId };
-    if (additional) {
-      data.additional = true;
-      user =
-        `\nHere are the answers to the question What did you see that made you say that in Picasso's Guernica?\n
-      ` + user;
-    } else data.additional = false;
+    user = `The answer to your question is ${user}`;
+    if (additional) data.additional = true;
+    else data.additional = false;
     const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
 
     const agent = result.data?.text;
@@ -341,7 +343,13 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     });
 
     if (additional) session.user.thirdAdditional = true;
-    else session.user.thirdDone = true;
+    else {
+      session.user.thirdDone = true;
+      const context = JSON.parse(await redisClient.get(sessionId));
+      const chat = { id: context.length + 1, human: "", ai: VTS.evaluate };
+      context.push(chat);
+      redisClient.set(sessionId, JSON.stringify(chat));
+    }
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
