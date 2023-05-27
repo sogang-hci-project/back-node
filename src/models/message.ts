@@ -38,12 +38,12 @@ Message.init(
       allowNull: false,
     },
     source: {
-      type: DataTypes.STRING(500),
-      allowNull: false,
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     relevantSources: {
-      type: DataTypes.STRING(500),
-      allowNull: false,
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {

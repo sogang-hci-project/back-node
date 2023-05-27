@@ -31,7 +31,7 @@ app.use("/api/v1", postRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
-  res.status(210).json({ message: "서버 내부 오류가 발생했습니다.", error });
+  res.status(210).json({ message: "API 서버 내부 오류가 발생했습니다.", error });
 });
 
 app.listen(port, () => {
