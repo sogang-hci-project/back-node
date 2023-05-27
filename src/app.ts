@@ -16,7 +16,7 @@ if (isProd) {
 } else {
   app.use(morgan("dev"));
 }
-
+//@ts-ignore
 app.use(session(sessionOptions));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
