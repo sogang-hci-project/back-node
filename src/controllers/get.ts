@@ -2,6 +2,7 @@ import { Request, NextFunction, Response } from "express";
 import session from "express-session";
 import { User } from "~/models";
 import { redisClient } from "~/lib/redis";
+import { maxAge } from "~/config/module";
 
 export interface UserSession extends session.Session {
   user: {
@@ -44,10 +45,11 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
 
     return res
       .status(200)
-      .cookie("x_auth", "test123123", {
+      .cookie(process.env.COOKIE_SECRET, sessionId, {
         secure: true,
         sameSite: "none",
         httpOnly: true,
+        maxAge,
       })
       .json({ message: "success session init", currentStage, nextStage });
   } catch (e) {
