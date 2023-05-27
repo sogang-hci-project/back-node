@@ -29,7 +29,7 @@ app.use(
     secret: "siwon",
     cookie: {
       secure: false,
-      httpOnly: true,
+      httpOnly: false,
       domain: ".sgu-hci.p-e.kr",
       maxAge,
     },
