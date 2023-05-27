@@ -16,6 +16,7 @@ if (isProd) {
   sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 } else {
   app.use(morgan("dev"));
+  sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 }
 
 app.use(session(sessionOptions));
