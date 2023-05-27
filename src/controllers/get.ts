@@ -42,10 +42,10 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     session.user = { currentStage, nextStage };
     res.setHeader("Access-Control-Allow-Origin", "https://localhost:3000");
     res.setHeader("Access-Control-Allow-Credentials", "true");
-
+    console.log("세션아이디", sessionId);
     return res
       .status(200)
-      .cookie(process.env.COOKIE_SECRET, `sess:${sessionId}`, {
+      .cookie(process.env.COOKIE_SECRET, `s:${sessionId}`, {
         secure: true,
         sameSite: "none",
         httpOnly: true,
