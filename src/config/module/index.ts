@@ -28,7 +28,6 @@ export const sessionOptions: any = {
   cookie: {
     httpOnly: true,
     secure: false,
-    domain: ".cookie-test-web.vercel.app",
     maxAge,
   },
 };

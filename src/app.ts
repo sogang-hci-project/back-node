@@ -12,29 +12,13 @@ app.set("port", 3030);
 const port = app.get("port");
 
 if (isProd) {
-  // app.set("trust proxy", 1);
-  console.log("🔥🔥🔥배포 모드 실행🔥🔥🔥");
   app.use(morgan("combined"));
+  sessionOptions.cookie.domain = ".cookie-test-web.vercel.app";
 } else {
-  // app.set("trust proxy", 1);
-  console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
   app.use(morgan("dev"));
 }
 
-app.use(
-  session({
-    saveUninitialized: true,
-    resave: false,
-    proxy: false, // 이게 있던 없던 nginx 에서 cookie 값에 대한 설정이 있다면 그게 덮어씌워짐.
-    secret: "siwon",
-    cookie: {
-      secure: false,
-      httpOnly: true,
-      domain: ".sgu-hci.p-e.kr",
-      maxAge,
-    },
-  })
-);
+app.use(session(sessionOptions));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
