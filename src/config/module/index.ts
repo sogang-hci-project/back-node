@@ -11,8 +11,8 @@ export const maxAge = 1000 * 60 * 60 * 12; // 12h
 
 export const isProd = process.env.NODE_ENV === "production";
 export const corsOptions = {
-  // origin: true,
-  origin: "https://cookie-test-cyan.vercel.app",
+  origin: true,
+  // origin: "https://cookie-test-cyan.vercel.app",
   credentials: true,
   optionsSuccessStatus: 200,
 };
