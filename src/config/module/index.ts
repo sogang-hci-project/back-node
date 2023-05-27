@@ -27,7 +27,7 @@ export const sessionOptions: any = {
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: false,
     sameSite: "None",
     maxAge,
   },
