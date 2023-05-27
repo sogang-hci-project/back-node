@@ -15,7 +15,7 @@ export const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
-export const sessionOptions = {
+export const sessionOptions: any = {
   store: redisStore,
   genid: function () {
     return uuidv4();
@@ -25,7 +25,6 @@ export const sessionOptions = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    sameSite: "none",
     secure: false,
     httpOnly: true,
     maxAge,

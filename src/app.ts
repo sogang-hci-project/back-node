@@ -12,11 +12,18 @@ app.set("port", 3030);
 const port = app.get("port");
 
 if (isProd) {
+  console.log("🔥🔥🔥배포 모드 실행🔥🔥🔥");
   app.use(morgan("combined"));
+  sessionOptions.proxy = true;
+  sessionOptions.resave = true;
+  sessionOptions.saveUninitialized = true;
+  sessionOptions.cookie.secure = true;
+  sessionOptions.cookie.sameSite = "none";
 } else {
+  console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
   app.use(morgan("dev"));
 }
-//@ts-ignore
+
 app.use(session(sessionOptions));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
