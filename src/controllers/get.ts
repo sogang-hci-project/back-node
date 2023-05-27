@@ -36,14 +36,19 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     const nextStage = "/session/greeting";
     //'sess' means session
     const alreadyInit = await redisClient.get(`sess:${sessionId}`);
-    console.log("alreadyInit 체크", alreadyInit);
-    console.log("세션아이디", sessionId);
     if (alreadyInit)
       return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
     await User.create({ sessionId });
     session.user = { currentStage, nextStage };
 
-    return res.status(200).json({ message: "success session init", currentStage, nextStage });
+    return res
+      .status(200)
+      .cookie(process.env.SESSION_NAME, `s:${sessionId}`, {
+        secure: true,
+        sameSite: "none",
+        httpOnly: true,
+      })
+      .json({ message: "success session init", currentStage, nextStage });
   } catch (e) {
     next(e);
   }
