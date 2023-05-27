@@ -13,7 +13,7 @@ const port = app.get("port");
 
 if (isProd) {
   app.use(morgan("combined"));
-  sessionOptions.cookie.domain = ".cookie-test-web.vercel.app";
+  sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 } else {
   app.use(morgan("dev"));
 }
