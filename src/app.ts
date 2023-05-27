@@ -30,7 +30,7 @@ app.use(
     cookie: {
       secure: false,
       httpOnly: true,
-      domain: "/",
+      domain: ".sgu-hci.p-e.kr",
       maxAge,
     },
   })
