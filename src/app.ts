@@ -35,6 +35,16 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json(`서버 연결 성공: ${req.protocol}, ${process.env.NODE_ENV || "develop"}`);
 });
 
+app.get("/test", (req: any, res: any, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "localhost:3000");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.status(200).cookie("x_auth", "test123123", {
+    secure: true,
+    sameSite: "None",
+    httpOnly: true,
+  });
+});
+
 app.use("/api/v1", getRouter);
 app.use("/api/v1", postRouter);
 
