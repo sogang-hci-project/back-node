@@ -3,7 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import session from "express-session";
 
-import { corsOptions, isProd, sessionOptions } from "~/config/module";
+import { corsOptions, isProd, maxAge, sessionOptions } from "~/config/module";
 import { getRouter, postRouter } from "./routes";
 import db from "~/models";
 
@@ -12,14 +12,29 @@ app.set("port", 3030);
 const port = app.get("port");
 
 if (isProd) {
+  app.set("trust proxy", 1);
   console.log("🔥🔥🔥배포 모드 실행🔥🔥🔥");
   app.use(morgan("combined"));
 } else {
+  app.set("trust proxy", 1);
   console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
   app.use(morgan("dev"));
 }
 
-app.use(session(sessionOptions));
+app.use(
+  session({
+    saveUninitialized: true,
+    resave: false,
+    proxy: true,
+    secret: "siwon",
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      domain: ".cookie-test-cyan.vercel.app",
+      maxAge,
+    },
+  })
+);
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
