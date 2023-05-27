@@ -25,7 +25,7 @@ app.use(
   session({
     saveUninitialized: true,
     resave: false,
-    proxy: true,
+    proxy: false,
     secret: "siwon",
     cookie: {
       secure: false,
