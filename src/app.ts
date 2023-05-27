@@ -21,6 +21,11 @@ if (isProd) {
   sessionOptions.cookie.sameSite = "none";
 } else {
   console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
+  sessionOptions.proxy = true;
+  sessionOptions.resave = true;
+  sessionOptions.saveUninitialized = true;
+  sessionOptions.cookie.secure = true;
+  sessionOptions.cookie.sameSite = "none";
   app.use(morgan("dev"));
 }
 
