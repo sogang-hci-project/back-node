@@ -10,6 +10,7 @@ import { redisClient } from "~/lib/redis";
 interface IData {
   user: string;
   sessionId?: string;
+  additional?: boolean;
 }
 
 /**
@@ -24,18 +25,17 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     const session = req.session as UserSession;
     const check = session.user.sessionGreeting;
     const user = req.body.user;
-    if (check) {
-      const nextStage = session.user.nextStage;
-      // return res.status(400).json({ message: `already done`, nextStage });
-    }
-    // if (!user) return res.status(400).json({ message: "incorrect API data" });
+    if (!user) return res.status(400).json({ message: "incorrect API data" });
+
     const sessionId = `${req.sessionID}`;
     const currentStage = "/session/greeting";
     const nextStage = `/vts/init?additional=true`;
+    // if (check) return res.status(400).json({ message: `already done`, nextStage });
 
     const data: IData = { user, sessionId };
     const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk-with-free`, data);
     const agent = result.data.text;
+    const contents = { agent };
 
     await Message.create({
       user,
@@ -50,7 +50,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     session.user.nextStage = nextStage;
     session.user.sessionGreeting = true;
 
-    return res.status(200).json({ message: "greeting success", user, currentStage, nextStage });
+    return res.status(200).json({ message: "greeting success", user, contents, currentStage, nextStage });
   } catch (e) {
     next(e);
   }
@@ -67,12 +67,18 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     const additionalCheck = session.user.initAdditional;
     const doneCheck = session.user.initDone;
     const sessionId = `${req.sessionID}`;
+
+    // 인증
     const { user } = req.body;
+    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    // 인증
     let additional;
     if (req.query.additional === "true") additional = true;
     else if (req.query.additional === "false") additional = false;
     if (additional === undefined) return res.status(400).json({ message: "incorrect query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    // 인증
     const currentStage = `/vts/init?additional=${additional}`;
     const nextStage = additional ? `/vts/init?additional=${!additional}` : `/vts/first?additional=${!additional}`;
     if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
@@ -93,9 +99,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         UserSessionId: sessionId,
       });
 
-      let context = await redisClient.get(sessionId);
-      context += `${user}, ${agent}`;
-      redisClient.set(sessionId, context);
+      let context = JSON.parse(await redisClient.get(sessionId));
+      const chat = { id: context.length + 1, human: user, ai: agent };
+      context.push(chat);
+      redisClient.set(sessionId, JSON.stringify(context));
 
       session.user.initAdditional = true;
 
@@ -123,9 +130,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
         UserSessionId: sessionId,
       });
 
-      let context = await redisClient.get(sessionId);
-      context += `${user}, ${agent}, ${VTS.first}`;
-      redisClient.set(sessionId, context);
+      let context = JSON.parse(await redisClient.get(sessionId));
+      const chat = { id: context.length + 1, human: user, ai: VTS.first };
+      context.push(chat);
+      redisClient.set(sessionId, JSON.stringify(context));
 
       session.user.initDone = true;
 
@@ -160,26 +168,33 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     const additionalCheck = session.user.firstAdditional;
     const doneCheck = session.user.firstDone;
     const sessionId = `${req.sessionID}`;
+
+    //인증
     let { user } = req.body;
+    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    //인증
     let additional;
     if (req.query.additional === "true") additional = true;
     else if (req.query.additional === "false") additional = false;
     if (additional === undefined) return res.status(400).json({ message: "incorrect query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    //인증
     const currentStage = `/vts/first?additional=${additional}`;
     const nextStage = additional ? `/vts/first?additional=${!additional}` : `/vts/second?additional=${!additional}`;
-    if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
-    if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
     const data: IData = { user, sessionId };
+    if (additional) data.additional = true;
+    else data.additional = false;
     const result = await axios.post(`${LLM_SERVER}/talk`, data);
 
-    console.log("테스트 중입니다. 🔥🔥🔥🔥", result.data);
     const agent = result.data?.text;
     const quiz = result.data?.quiz;
     const answer = result.data?.answer;
-
     const contents = { agent, answer, quiz };
+
     await Message.create({
       user,
       agent,
@@ -192,7 +207,13 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     if (additional) session.user.firstAdditional = true;
-    else session.user.firstDone = true;
+    else {
+      session.user.firstDone = true;
+      let context = JSON.parse(await redisClient.get(sessionId));
+      const chat = { id: context.length + 1, human: "", ai: VTS.second };
+      context.push(chat);
+      redisClient.set(sessionId, JSON.stringify(context));
+    }
 
     return res.status(200).json({
       message: additional
@@ -215,46 +236,56 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     const sessionId = `${req.sessionID}`;
     const additionalCheck = session.user.secondAdditional;
     const doneCheck = session.user.secondDone;
+
     let { user } = req.body;
+    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    // 인증
     let additional;
     if (req.query.additional === "true") additional = true;
     else if (req.query.additional === "false") additional = false;
     if (additional === undefined) return res.status(400).json({ message: "incorrect query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    // 인증
     const currentStage = `/vts/second?additional=${additional}`;
     const nextStage = additional ? `/vts/second?additional=${!additional}` : `/vts/third?additional=${!additional}`;
-    if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
-    if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
+    // if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
-    const data: IData = { user };
-
+    const data: IData = { user, sessionId };
+    if (additional) data.additional = true;
+    else data.additional = false;
     const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
-
-    const agent = result.data.contents.answer;
-    const source = result.data.contents.source;
-    const relevantSources = JSON.stringify(result.data.contents.relevantSources);
+    const agent = result.data?.text;
+    const quiz = result.data?.quiz;
+    const answer = result.data?.answer;
+    const contents = { agent, answer, quiz };
 
     await Message.create({
       user,
       agent,
-      source,
       free: false,
-      relevantSources,
       stage: currentStage,
       type: "dynamic",
       UserSessionId: sessionId,
     });
 
+    if (additional) session.user.secondAdditional = true;
+    else {
+      session.user.secondDone = true;
+      let context = JSON.parse(await redisClient.get(sessionId));
+      const chat = { id: context.length + 1, human: "", ai: VTS.third };
+      context.push(chat);
+      redisClient.set(sessionId, JSON.stringify(context));
+    }
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
 
     return res.status(200).json({
       message: additional ? "reply for additional question" : "additional question end. reply for third VTS quesiton",
       user,
-      agent,
-      source,
+      contents,
       VTS_THIRD: !additional && VTS.third,
-      relevantSources,
       currentStage,
       nextStage,
     });
@@ -266,39 +297,51 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
 export const postVTSThird = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const UserSessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
+    const additionalCheck = session.user.thirdAdditional;
+    const doneCheck = session.user.thirdDone;
+
+    //인증
     let { user } = req.body;
+    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    //인증
     let additional;
     if (req.query.additional === "true") additional = true;
     else if (req.query.additional === "false") additional = false;
     if (additional === undefined) return res.status(400).json({ message: "incorrect query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+
+    //인증
     const currentStage = `/vts/third?additional=${additional}`;
     const nextStage = additional ? `/vts/third?additional=${!additional}` : `/vts/end`;
+    if (additional && additionalCheck) return res.status(400).json({ message: "already done", nextStage });
+    if (!additional && doneCheck) return res.status(400).json({ message: "already done", nextStage });
 
-    // if (additional) {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. And create one additional question for it. \n ${user}`;
-    // } else {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
-    // }
-    const data: IData = { user };
-
+    const data: IData = { user, sessionId };
+    if (additional) {
+      data.additional = true;
+      user =
+        `\nHere are the answers to the question What did you see that made you say that in Picasso's Guernica?\n
+      ` + user;
+    } else data.additional = false;
     const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
 
-    const agent = result.data.contents.answer;
-    const source = result.data.contents.source;
-    const relevantSources = JSON.stringify(result.data.contents.relevantSources);
+    const agent = result.data?.text;
+    const quiz = result.data?.quiz;
+    const answer = result.data?.answer;
+    const contents = { agent, answer, quiz };
 
     await Message.create({
       user,
       agent,
-      source,
       free: false,
-      relevantSources,
       stage: currentStage,
       type: "dynamic",
-      UserSessionId,
+      UserSessionId: sessionId,
     });
+
+    if (additional) session.user.thirdAdditional = true;
+    else session.user.thirdDone = true;
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
@@ -306,10 +349,8 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     return res.status(200).json({
       message: additional ? "reply for third additional question" : "VTS session end",
       user,
-      agent,
-      source,
+      contents,
       VTS_EVALUATE: !additional && VTS.evaluate,
-      relevantSources,
       currentStage,
       nextStage,
     });
@@ -321,31 +362,25 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
 export const postVTSEnd = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const UserSessionId = `sess:${req.sessionID}`;
+    const sessionId = `${req.sessionID}`;
+    const additionalCheck = session.user.thirdAdditional;
+    const doneCheck = session.user.thirdDone;
+
     let { user } = req.body;
     if (!user) return res.status(400).json({ message: "incorrect data" });
+
     const currentStage = `/vts/end`;
     const nextStage = `/qna?additional=true`;
 
-    // if (additional) {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. And create one additional question for it. \n ${user}`;
-    // } else {
-    //   user = `As visual thinking strategy practitioner, Rephrase the question below and answer it. \n ${user} `;
-    // }
-
     const agent = "none";
-    const source = `user's response`;
-    const relevantSources = `user's response`;
 
     await Message.create({
       user,
       agent,
-      source,
       free: false,
-      relevantSources,
       stage: currentStage,
       type: "dynamic",
-      UserSessionId,
+      UserSessionId: sessionId,
     });
 
     session.user.currentStage = currentStage;
@@ -355,8 +390,6 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
       message: "Thank you for participating in the evaluation.",
       user,
       agent,
-      source,
-      relevantSources,
       currentStage,
       nextStage,
     });

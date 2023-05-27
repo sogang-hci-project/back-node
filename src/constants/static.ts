@@ -3,6 +3,6 @@ export default {
    Do you agree to start a VTS session?`,
   first: "What's going on in Picasso's Guernica?",
   second: "What did you see that made you say that in Picasso's Guernica?",
-  third: "What else can you find?",
+  third: "What else can you find in Picasso's Guernica?",
   evaluate: "All VTS sessions have ended. Please rate your VTS session.",
 };
