@@ -25,12 +25,12 @@ app.use(
   session({
     saveUninitialized: true,
     resave: false,
-    proxy: false,
+    proxy: false, // 이게 있던 없던 nginx 에서 cookie 값에 대한 설정이 있다면 그게 덮어씌워짐.
     secret: "siwon",
     cookie: {
       secure: false,
       httpOnly: true,
-      domain: ".cookie-test-cyan.vercel.app",
+      domain: "/",
       maxAge,
     },
   })
