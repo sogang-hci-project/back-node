@@ -11,7 +11,8 @@ const maxAge = 1000 * 60 * 60 * 12; // 12h
 
 export const isProd = process.env.NODE_ENV === "production";
 export const corsOptions = {
-  origin: true,
+  // origin: true,
+  origin: "https://localhost:3000",
   credentials: true,
   optionsSuccessStatus: 200,
 };

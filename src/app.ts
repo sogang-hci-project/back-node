@@ -21,6 +21,8 @@ if (isProd) {
   sessionOptions.saveUninitialized = true;
   sessionOptions.cookie.secure = true;
   sessionOptions.cookie.domain = "/";
+  sessionOptions.cookie.sameSite = "none";
+  console.log(sessionOptions);
   app.use(morgan("dev"));
 }
 
