@@ -45,7 +45,7 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     console.log("세션아이디", sessionId);
     return res
       .status(200)
-      .cookie(process.env.COOKIE_SECRET, `s:${sessionId}`, {
+      .cookie(process.env.COOKIE_SECRET, `sess:${sessionId}`, {
         secure: true,
         sameSite: "none",
         httpOnly: true,
