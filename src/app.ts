@@ -12,11 +12,11 @@ app.set("port", 3030);
 const port = app.get("port");
 
 if (isProd) {
-  app.set("trust proxy", 1);
+  // app.set("trust proxy", 1);
   console.log("🔥🔥🔥배포 모드 실행🔥🔥🔥");
   app.use(morgan("combined"));
 } else {
-  app.set("trust proxy", 1);
+  // app.set("trust proxy", 1);
   console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
   app.use(morgan("dev"));
 }
