@@ -24,7 +24,6 @@ interface IData {
 export const postSessionGreeting = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    console.log("세션 체크", session);
     const check = session.user.sessionGreeting;
     const user = req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect API data" });

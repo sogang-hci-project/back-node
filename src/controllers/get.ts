@@ -42,14 +42,7 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     session.user = { currentStage, nextStage };
     console.log("session", session);
     console.log("session 유저", session.user);
-    return res
-      .status(200)
-      .cookie(process.env.SESSION_NAME, `sess:${sessionId}`, {
-        secure: true,
-        sameSite: "none",
-        httpOnly: true,
-      })
-      .json({ message: "success session init", currentStage, nextStage });
+    return res.status(200).json({ message: "success session init", currentStage, nextStage });
   } catch (e) {
     next(e);
   }
