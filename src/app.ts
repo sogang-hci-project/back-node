@@ -36,7 +36,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.get("/test", (req: any, res: any, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", "https://localhost:3000");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res
     .status(200)
