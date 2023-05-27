@@ -28,7 +28,7 @@ export const sessionOptions: any = {
   cookie: {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
     maxAge,
   },
 };
