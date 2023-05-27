@@ -40,18 +40,9 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
       return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
     await User.create({ sessionId });
     session.user = { currentStage, nextStage };
-    res.setHeader("Access-Control-Allow-Origin", "https://localhost:3000");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
+
     console.log("세션아이디", sessionId);
-    return res
-      .status(200)
-      .cookie(process.env.COOKIE_SECRET, `sess:${sessionId}`, {
-        secure: true,
-        sameSite: "none",
-        httpOnly: true,
-        maxAge,
-      })
-      .json({ message: "success session init", currentStage, nextStage });
+    return res.status(200).json({ message: "success session init", currentStage, nextStage });
   } catch (e) {
     next(e);
   }
