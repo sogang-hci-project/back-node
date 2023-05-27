@@ -14,18 +14,13 @@ const port = app.get("port");
 if (isProd) {
   console.log("🔥🔥🔥배포 모드 실행🔥🔥🔥");
   app.use(morgan("combined"));
-  sessionOptions.proxy = true;
-  sessionOptions.resave = true;
-  sessionOptions.saveUninitialized = true;
-  sessionOptions.cookie.secure = true;
-  sessionOptions.cookie.sameSite = "none";
 } else {
   console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
   sessionOptions.proxy = true;
   sessionOptions.resave = true;
   sessionOptions.saveUninitialized = true;
   sessionOptions.cookie.secure = true;
-  sessionOptions.cookie.sameSite = "none";
+  sessionOptions.cookie.domain = "/";
   app.use(morgan("dev"));
 }
 
