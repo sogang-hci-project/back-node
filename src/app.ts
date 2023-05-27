@@ -16,12 +16,10 @@ if (isProd) {
   app.use(morgan("combined"));
 } else {
   console.log("🔥🔥🔥개발 모드 실행🔥🔥🔥");
-  sessionOptions.proxy = true;
   sessionOptions.resave = true;
   sessionOptions.saveUninitialized = true;
   sessionOptions.cookie.secure = true;
-  sessionOptions.cookie.domain = "/";
-  sessionOptions.cookie.sameSite = "none";
+  sessionOptions.cookie.sameSite = "None";
   console.log(sessionOptions);
   app.use(morgan("dev"));
 }
