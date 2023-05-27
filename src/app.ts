@@ -38,11 +38,14 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 app.get("/test", (req: any, res: any, next) => {
   res.setHeader("Access-Control-Allow-Origin", "localhost:3000");
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.status(200).cookie("x_auth", "test123123", {
-    secure: true,
-    sameSite: "None",
-    httpOnly: true,
-  });
+  res
+    .status(200)
+    .cookie("x_auth", "test123123", {
+      secure: true,
+      sameSite: "None",
+      httpOnly: true,
+    })
+    .json({ message: "??" });
 });
 
 app.use("/api/v1", getRouter);
