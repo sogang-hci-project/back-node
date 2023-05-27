@@ -28,8 +28,8 @@ app.use(
     proxy: false, // 이게 있던 없던 nginx 에서 cookie 값에 대한 설정이 있다면 그게 덮어씌워짐.
     secret: "siwon",
     cookie: {
-      secure: true,
-      httpOnly: false,
+      secure: false,
+      httpOnly: true,
       domain: ".sgu-hci.p-e.kr",
       maxAge,
     },
