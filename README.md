@@ -10,5 +10,6 @@ $ docker-compose up --build
 ```
 
 ```bash
+npm run build
 npm run start:pm2
 ```
