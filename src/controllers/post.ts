@@ -24,7 +24,7 @@ interface IData {
 export const postSessionGreeting = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const check = session.user.sessionGreeting;
+    // const check = session.user?.sessionGreeting;
     const user = req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect API data" });
 
@@ -65,8 +65,8 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
 export const postVTSInit = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const additionalCheck = session.user.initAdditional;
-    const doneCheck = session.user.initDone;
+    const additionalCheck = session.user?.initAdditional;
+    const doneCheck = session.user?.initDone;
     const sessionId = `${req.sessionID}`;
 
     // 인증
@@ -166,8 +166,8 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
 export const postVTSFirst = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const additionalCheck = session.user.firstAdditional;
-    const doneCheck = session.user.firstDone;
+    const additionalCheck = session.user?.firstAdditional;
+    const doneCheck = session.user?.firstDone;
     const sessionId = `${req.sessionID}`;
 
     //인증
@@ -237,8 +237,8 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
   try {
     const session = req.session as UserSession;
     const sessionId = `${req.sessionID}`;
-    const additionalCheck = session.user.secondAdditional;
-    const doneCheck = session.user.secondDone;
+    const additionalCheck = session.user?.secondAdditional;
+    const doneCheck = session.user?.secondDone;
 
     let { user } = req.body;
     if (!user) return res.status(400).json({ message: "incorrect data" });
@@ -303,8 +303,8 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
   try {
     const session = req.session as UserSession;
     const sessionId = `${req.sessionID}`;
-    const additionalCheck = session.user.thirdAdditional;
-    const doneCheck = session.user.thirdDone;
+    const additionalCheck = session.user?.thirdAdditional;
+    const doneCheck = session.user?.thirdDone;
 
     //인증
     let { user } = req.body;
