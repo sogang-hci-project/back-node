@@ -83,30 +83,29 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       context.push(chat);
       redisClient.set(sessionID, JSON.stringify(context));
 
+      const contents = { agent };
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
         user,
-        agent,
-        source: "static",
-        relevantSources: "static",
+        contents,
         currentStage,
         nextStage,
       });
     } else {
       const agent = "thank you for agreeing";
-
       let context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: user, ai: `${agent} ${VTS.first}` };
       context.push(chat);
       redisClient.set(sessionID, JSON.stringify(context));
+
+      const contents = { agent };
 
       return res.status(200).json({
         message: "vts init, reply for first vts question",
         user,
         agent,
         VTS_QUESTION: VTS.first,
-        source: "static",
-        relevantSources: "static",
+        contents,
         currentStage,
         nextStage,
       });

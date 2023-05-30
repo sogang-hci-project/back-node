@@ -58,8 +58,9 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionDate(session, sessionID);
+    const contents = { agent: VTS.introduce };
 
-    return res.status(200).json({ message: "success", VTS_QUESTION: VTS.introduce, currentStage, nextStage });
+    return res.status(200).json({ message: "success", contents, currentStage, nextStage });
   } catch (e) {
     next(e);
   }

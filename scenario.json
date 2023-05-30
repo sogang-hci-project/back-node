@@ -1,45 +1,59 @@
 [
-  {
-    "id": 1,
-    "human": "I'm Siwon Jeon. who are you?",
-    "ai": "\"I am Pablo Picasso, a painter from Spain. How can I assist you, Siwon?\""
-  },
-  {
-    "id": 2,
-    "human": "What is vts sesison?",
-    "ai": "Visual Thinking Strategies (VTS) is a question-based teaching methodology. It's a three-step process of listening and answering questions.\n   Do you agree to start a VTS session?"
-  },
-  { "id": 3, "human": "i agree", "ai": "thank you for agreeing What's going on in Picasso's Guernica?" },
+  { "id": 1, "human": "", "ai": "I'm Pablo Picasso, who are you? Tell us about yourself." },
+  { "id": 2, "human": "", "ai": "I'm Pablo Picasso, who are you? Tell me about yourself." },
+  { "id": 3, "human": "", "ai": "I'm Pablo Picasso, who are you? Tell me about yourself." },
   {
     "id": 4,
-    "human": "It looks like there's a person on the right.",
-    "ai": "Answer: Thank you for your question. Yes, there is a person on the right side of the painting. Guernica is a representation of the bombing of the town of Guernica during the Spanish Civil War. The painting depicts the suffering of the people and animals caught in the bombing. Quiz: What is the painting Guernica about?"
+    "human": "i'm Siwon Jeon.",
+    "ai": "Nice to meet you Siwon Jeon. As you probably already know, I am Pablo Picasso, a Spanish painter who co-founded the Cubist movement. What brings you here today?"
   },
   {
     "id": 5,
-    "human": "suffering of the people",
-    "ai": "Answer: Yes, that's correct. Guernica is a painting that depicts the suffering of the people and animals caught in the bombing of the town of Guernica during the Spanish Civil War. It was my way of expressing the tragedy and horror of war through art."
+    "human": "I'm here to join a VTS session.",
+    "ai": "Do you know VTS session? Visual Thinking Strategies (VTS) is a question-based teaching methodology. It's a three-step process of listening and answering questions.\n   Do you agree to start a VTS session?"
   },
-  { "id": 6, "human": "", "ai": "What did you see that made you say that in Picasso's Guernica?" },
+  { "id": 6, "human": "i agree", "ai": "thank you for agreeing What's going on in Picasso's Guernica?" },
   {
     "id": 7,
-    "human": "The overall picture is dark, and it's because you described it that way.",
-    "ai": "Answer: Thank you for your question. Guernica is a painting that depicts the suffering of the people and animals caught in the bombing of the town of Guernica during the Spanish Civil War. It was my way of expressing the tragedy and horror of war through art. The overall picture is dark because I wanted to convey the sense of despair and hopelessness that war brings. \n\nQuiz: What is the message that Picasso wanted to convey through Guernica?"
+    "human": "I see a horse in the center and a man down with a sword.",
+    "ai": "Answer: Welcome to our VTS session Siwon Jeon. Guernica is a painting I created in 1937. It depicts the bombing of Guernica, a Basque Country village in northern Spain, by German and Italian warplanes during the Spanish Civil War. The painting shows the tragedies and suffering of war and the innocent lives that are destroyed in the process. The horse in the center represents the people's suffering, and the sword-wielding man represents the aggressor. The painting is an anti-war symbol and a reminder of the horrors of war.\n\nQuiz: What does the horse in the center of Guernica represent?"
   },
   {
     "id": 8,
-    "human": "suffering of the war and people",
-    "ai": "Answer: Thank you for your question. Guernica is a painting that depicts the suffering of the people and animals caught in the bombing of the town of Guernica during the Spanish Civil War. It was my way of expressing the tragedy and horror of war through art. The painting was created as an anti-war protest piece in response to the 1937 aerial bombing of the town. The message that I wanted to convey through Guernica was the brutality and inhumanity of war and the suffering it brings to innocent people."
+    "human": "the people of Guernica, and the man with the sword represents the oppressors.",
+    "ai": "Answer: Great job, Siwon Jeon! You are absolutely right. The horse in the center of Guernica represents the people of Guernica who are suffering due to the bombing. And the man with the sword represents the oppressors who caused the bombing."
   },
-  { "id": 9, "human": "", "ai": "What else can you find in Picasso's Guernica?" },
+  { "id": 9, "human": "", "ai": "What did you see that made you say that in Picasso's Guernica?" },
   {
     "id": 10,
-    "human": "You can see a light at the top of the picture",
-    "ai": "Answer: Thank you for your question. Guernica is a painting that depicts the suffering of the people and animals caught in the bombing of the town of Guernica during the Spanish Civil War. It was my way of expressing the tragedy and horror of war through art. The painting was created as an anti-war protest piece in response to the 1937 aerial bombing of the town. The message that I wanted to convey through Guernica was the brutality and inhumanity of war and the suffering it brings to innocent people.\n\nQuiz: What was the motivation behind creating the painting Guernica?"
+    "human": "Your description of the painting as dark and depicting the horrors of war led me to respond as such.",
+    "ai": "Answer: Welcome to our VTS session Siwon Jeon. Guernica is a painting I created in 1937. It depicts the bombing of Guernica, a Basque Country village in northern Spain, by German and Italian warplanes during the Spanish Civil War. The painting shows the tragedies and suffering of war and the innocent lives that are destroyed in the process. The horse in the center represents the people's suffering, and the sword-wielding man represents the aggressor. The painting is an anti-war symbol and a reminder of the horrors of war.\n\nQuiz: What does the horse in the center of Guernica represent?"
   },
   {
     "id": 11,
-    "human": "to convey through Guernica was the brutality and inhumanity of war and the suffering it brings to innocent people.",
-    "ai": "Answer: Thank you for your question. Guernica is a painting that depicts the suffering of the people and animals caught in the bombing of the town of Guernica during the Spanish Civil War. It was my way of expressing the tragedy and horror of war through art. The painting was created as an anti-war protest piece in response to the 1937 aerial bombing of the town. The message that I wanted to convey through Guernica was the brutality and inhumanity of war and the suffering it brings to innocent people. In addition to the people and animals, you can also see various objects such as a broken sword, a shattered tree, and a lightbulb at the top of the painting. These objects represent the destruction and chaos of war."
+    "human": "spain civil war and suffering of people",
+    "ai": "Answer: Welcome back to our VTS session, Siwon Jeon. Yes, you are correct. Guernica is about the Spanish Civil War and the suffering of its people. The painting is a depiction of the bombing of the Basque Country village of Guernica during the war. It reflects the tragedies and suffering of war and is an anti-war symbol. The horse in the center of the painting represents the people's suffering, and the sword-wielding man represents the oppressors who caused the bombing. Thank you for your response. Do you have any other questions about the painting or its context?"
+  },
+  { "id": 12, "human": "", "ai": "What else can you find in Picasso's Guernica?" },
+  {
+    "id": 13,
+    "human": "On the far left, you can see a woman holding a child and screaming.",
+    "ai": "Answer: Welcome back to our VTS session, Siwon Jeon. In addition to the horse in the center and the man with the sword, there are other elements in the painting that represent the tragedies of war. On the left side of the painting, you can see a woman holding a dead child and screaming in agony. There are also other distorted figures and shapes that represent the chaos and destruction of the bombing. The painting is a powerful depiction of the horrors of war and its effect on innocent lives. \n\nQuiz: What do the distorted figures and shapes in Guernica represent?"
+  },
+  {
+    "id": 14,
+    "human": "the chaos and destruction of the bombing.",
+    "ai": "Answer: Welcome back to our VTS session, Siwon Jeon. In addition to the horse in the center and the man with the sword, there are other elements in the painting that represent the tragedies of war. On the left side of the painting, you can see a woman holding a dead child and screaming in agony. There are also other distorted figures and shapes that represent the chaos and destruction of the bombing. The painting is a powerful depiction of the horrors of war and its effect on innocent lives. \n\nQuiz: What do the distorted figures and shapes in Guernica represent?"
+  },
+  { "id": 15, "human": "", "ai": "All VTS sessions have ended. Please rate your VTS session." },
+  {
+    "id": 16,
+    "human": "It was a great time to interpret the work through questions and answers.",
+    "ai": "Answer: Welcome to our VTS session Siwon Jeon. Guernica is a painting I created in 1937. It depicts the bombing of Guernica, a Basque Country village in northern Spain, by German and Italian warplanes during the Spanish Civil War. The painting shows the tragedies and suffering of war and the innocent lives that are destroyed in the process. The horse in the center represents the people's suffering, and the sword-wielding man represents the aggressor. The painting is an anti-war symbol and a reminder of the horrors of war. Great job on your interpretation and analysis of the painting. Thank you for participating in our VTS session. Do you have any other questions or comments?"
+  },
+  {
+    "id": 17,
+    "human": "When and why did you draw this picture?",
+    "ai": "Answer: Welcome to our VTS session. Guernica is a painting I created in 1937. It depicts the bombing of Guernica, a Basque Country village in northern Spain, by German and Italian warplanes during the Spanish Civil War. The painting shows the tragedies and suffering of war and the innocent lives that are destroyed in the process. The horse in the center represents the people's suffering, and the sword-wielding man represents the aggressor. The painting is an anti-war symbol and a reminder of the horrors of war. Thank you for participating in our VTS session. Do you have any other questions or comments?"
   }
 ]
