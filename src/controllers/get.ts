@@ -1,8 +1,9 @@
 import { Request, NextFunction, Response } from "express";
 import session from "express-session";
-import { User } from "~/models";
 import { redisClient } from "~/lib/redis";
-import { maxAge } from "~/config/module";
+import { v4 as uuidv4 } from "uuid";
+import { VTS } from "~/constants";
+import { updateSessionDate } from "~/utils";
 
 export interface UserSession extends session.Session {
   user: {
@@ -23,26 +24,42 @@ export interface UserSession extends session.Session {
 
 /**
  * GET controller for session init
- * @param req {Request} HTTP request
- * @param res {Response} HTTP response
- * @param next {NextFunction} error handling
  */
 
 export const getInitSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const session = req.session as UserSession;
-    const sessionId = `${req.sessionID}`;
     const currentStage = "/session/init";
+    const nextStage = "/session/pre";
+
+    const sessionID = uuidv4();
+    const session = { user: { currentStage, nextStage } };
+    redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
+    return res.status(200).json({ message: "session init success", sessionID, currentStage, nextStage });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const getPreInitSession = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const sessionID = req.sessionID;
+    const session = req.session as UserSession;
+    const currentStage = "/session/pre";
     const nextStage = "/session/greeting";
-    //'sess' means session
-    const alreadyInit = await redisClient.get(`sess:${sessionId}`);
-    if (alreadyInit)
-      return res.status(400).json({ message: "session already init", nextStage: `${session.user.nextStage}` });
-    await User.create({ sessionId });
-    session.user = { currentStage, nextStage };
-    console.log("session", session);
-    console.log("session 유저", session.user);
-    return res.status(200).json({ message: "success session init", currentStage, nextStage });
+
+    // init context
+    let context = JSON.parse(await redisClient.get(sessionID));
+    if (!context) context = [];
+    const chat = { id: context.length + 1, human: "", ai: VTS.introduce };
+    context.push(chat);
+    redisClient.set(sessionID, JSON.stringify(context));
+
+    // update user session data
+    session.user.currentStage = currentStage;
+    session.user.nextStage = nextStage;
+    updateSessionDate(session, sessionID);
+
+    return res.status(200).json({ message: "success", VTS_QUESTION: VTS.introduce, currentStage, nextStage });
   } catch (e) {
     next(e);
   }

@@ -19,7 +19,7 @@ if (isProd) {
   sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 }
 
-app.use(session(sessionOptions));
+// app.use(session(sessionOptions));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
