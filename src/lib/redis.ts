@@ -1,8 +1,7 @@
 import Redis from "ioredis";
-import dotenv from "dotenv";
+import { isProd } from "~/config/module";
 
-dotenv.config();
-// export const redisClient = new Redis(process.env.REDIS_END_POINT);
+const host = isProd ? `hci-redis-store.ft0k3r.clustercfg.apn2.cache.amazonaws.com` : "127.0.0.1";
 export const redisClient = new Redis({
-  host: "127.0.0.1",
+  host,
 });
