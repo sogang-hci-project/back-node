@@ -33,7 +33,7 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
 
     const sessionID = uuidv4();
     const session = { user: { currentStage, nextStage } };
-    redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
+    await redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
     return res.status(200).json({ message: "session init success", sessionID, currentStage, nextStage });
   } catch (e) {
     next(e);
@@ -52,7 +52,7 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     if (!context) context = [];
     const chat = { id: context.length + 1, human: "", ai: VTS.introduce };
     context.push(chat);
-    redisClient.set(sessionID, JSON.stringify(context));
+    await redisClient.set(sessionID, JSON.stringify(context));
 
     // update user session data
     session.user.currentStage = currentStage;
