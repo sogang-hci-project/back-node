@@ -1,9 +1,12 @@
 export default {
-  introduce: "I'm Pablo Picasso, who are you? Tell me about yourself.",
-  what: `Do you know VTS session? Visual Thinking Strategies (VTS) is a question-based teaching methodology. It's a three-step process of listening and answering questions.
-   Do you agree to start a VTS session?`,
-  first: "What's going on in Picasso's Guernica?",
-  second: "What did you see that made you say that in Picasso's Guernica?",
-  third: "What else can you find in Picasso's Guernica?",
-  evaluate: "All VTS sessions have ended. Please rate your VTS session.",
+  introduce: `Greetings, my dear friend! Welcome to my painting Guernica.
+  I, Pablo Picasso, extend my warmest salutations to you. With my brush as my voice and colors as my language, I endeavor to create a world where imagination knows no bounds.
+  Now, can you introduce me about yourself? Maybe about your name or interest.`,
+  what: `I see, Lets move on to the questions. Questions can harness the power of visual imagery to enhance understanding of the art.
+  I'll ask you a couple of questions to help you find captivating features of my painting. Will you join me?`,
+  first: "In the painting, what do you think is going on?",
+  second: "What else can you find in the painting?",
+  third: "Is there anything other that catches your attention?",
+  evaluate:
+    "Well done, my dear friend. Our journey within the painting Guernica has now ended. Tell me with honest hearts. Did you enjoy our conversation?",
 };
