@@ -81,7 +81,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       let context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: user, ai: agent };
       context.push(chat);
-      redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(sessionID, JSON.stringify(context));
 
       const contents = { agent };
       return res.status(200).json({
@@ -96,7 +96,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       let context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: user, ai: `${agent} ${VTS.first}` };
       context.push(chat);
-      redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(sessionID, JSON.stringify(context));
 
       const contents = { agent };
 
@@ -163,7 +163,7 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       let context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: "", ai: VTS.second };
       context.push(chat);
-      redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(sessionID, JSON.stringify(context));
     }
 
     return res.status(200).json({
@@ -215,7 +215,7 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
       let context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: "", ai: VTS.third };
       context.push(chat);
-      redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(sessionID, JSON.stringify(context));
     }
 
     session.user.currentStage = currentStage;
@@ -270,7 +270,7 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
       const context = JSON.parse(await redisClient.get(sessionID));
       const chat = { id: context.length + 1, human: "", ai: VTS.evaluate };
       context.push(chat);
-      redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(sessionID, JSON.stringify(context));
     }
 
     session.user.currentStage = currentStage;
