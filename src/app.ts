@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import session from "express-session";
 
 import { corsOptions, isProd, maxAge, sessionOptions } from "~/config/module";
 import { getRouter, postRouter } from "./routes";
@@ -19,26 +18,12 @@ if (isProd) {
   sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 }
 
-// app.use(session(sessionOptions));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json(`서버 연결 성공: ${req.protocol}, ${process.env.NODE_ENV || "develop"}`);
-});
-
-app.get("/test", (req: any, res: any, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://localhost:3000");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res
-    .status(200)
-    .cookie("x_auth", "test123123", {
-      secure: true,
-      sameSite: "None",
-      httpOnly: true,
-    })
-    .json({ message: "??" });
 });
 
 app.use("/api/v1", getRouter);
