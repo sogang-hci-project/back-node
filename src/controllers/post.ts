@@ -6,7 +6,7 @@ import { LLM_SERVER } from "~/constants";
 import { Message } from "~/models";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
-import { updateSessionDate } from "~/utils";
+import { languageToggler, updateSessionData } from "~/utils";
 
 interface IData {
   user: string;
@@ -25,7 +25,9 @@ interface IData {
 export const postSessionGreeting = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
-    const user = req.body.user;
+    const translatedText = res.locals?.translatedText;
+    const lang = req.query.lang;
+    let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect API data" });
 
     const sessionID = `${req.sessionID}`;
@@ -40,7 +42,13 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     // update session data
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
+
+    if (lang === "ko" && translatedText) {
+      user = res.locals.original;
+      contents.agent = await languageToggler(agent, "en");
+      console.log("다시 변환 실행");
+    }
 
     return res.status(200).json({ message: "greeting success", user, contents, currentStage, nextStage });
   } catch (e) {
@@ -57,9 +65,9 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
   try {
     const session = req.session as UserSession;
     const sessionID = `${req.sessionID}`;
-
-    // 인증
-    const { user } = req.body;
+    const translatedText = res.locals?.translatedText;
+    const lang = req.query.lang;
+    let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     // 인증
@@ -75,7 +83,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     const agent = VTS.what;
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
 
     if (additional) {
       let context = JSON.parse(await redisClient.get(sessionID));
@@ -84,6 +92,11 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       await redisClient.set(sessionID, JSON.stringify(context));
 
       const contents = { agent };
+      if (lang === "ko" && translatedText) {
+        user = res.locals.original;
+        contents.agent = VTS.whatKorean;
+        console.log("다시 변환 실행");
+      }
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
         user,
@@ -99,7 +112,11 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       await redisClient.set(sessionID, JSON.stringify(context));
 
       const contents = { agent };
-
+      if (lang === "ko" && translatedText) {
+        user = res.locals.original;
+        contents.agent = `동의해 주셔서 감사합니다.`;
+        console.log("다시 변환 실행");
+      }
       return res.status(200).json({
         message: "vts init, reply for first vts question",
         user,
@@ -157,7 +174,7 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
 
     if (!additional) {
       let context = JSON.parse(await redisClient.get(sessionID));
@@ -220,7 +237,7 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
 
     return res.status(200).json({
       message: additional ? "reply for additional question" : "additional question end. reply for third VTS quesiton",
@@ -275,7 +292,7 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
 
     return res.status(200).json({
       message: additional ? "reply for third additional question" : "VTS session end",
@@ -317,7 +334,7 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
 
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
 
     return res.status(200).json({
       message: "Thank you for participating in the evaluation.",

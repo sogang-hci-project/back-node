@@ -1,14 +1,14 @@
 import express from "express";
 import { postSessionGreeting, postVTSInit, postVTSFirst, postVTSSecond, postVTSThird, postVTSEnd } from "~/controllers";
-import { addSession, isSessionInit } from "~/lib/middlewares";
+import { addSession, isSessionInit, translation } from "~/lib/middlewares";
 
 const postRouter = express.Router();
 
-postRouter.post("/session/greeting", addSession, postSessionGreeting);
-postRouter.post("/vts/init", addSession, postVTSInit);
-postRouter.post("/vts/first", addSession, postVTSFirst);
-postRouter.post("/vts/second", addSession, postVTSSecond);
-postRouter.post("/vts/third", addSession, postVTSThird);
-postRouter.post("/vts/end", addSession, postVTSEnd);
+postRouter.post("/session/greeting", addSession, translation, postSessionGreeting);
+postRouter.post("/vts/init", addSession, translation, postVTSInit);
+postRouter.post("/vts/first", addSession, translation, postVTSFirst);
+postRouter.post("/vts/second", addSession, translation, postVTSSecond);
+postRouter.post("/vts/third", addSession, translation, postVTSThird);
+postRouter.post("/vts/end", addSession, translation, postVTSEnd);
 
 export default postRouter;

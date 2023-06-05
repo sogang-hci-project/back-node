@@ -3,7 +3,7 @@ import session from "express-session";
 import { redisClient } from "~/lib/redis";
 import { v4 as uuidv4 } from "uuid";
 import { VTS } from "~/constants";
-import { updateSessionDate } from "~/utils";
+import { updateSessionData } from "~/utils";
 
 export interface UserSession extends session.Session {
   user: {
@@ -20,6 +20,7 @@ export interface UserSession extends session.Session {
     thirdAdditional?: boolean;
     thirdDone?: boolean;
   };
+  translatedText?: string;
 }
 
 /**
@@ -57,7 +58,7 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     // update user session data
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
-    updateSessionDate(session, sessionID);
+    updateSessionData(session, sessionID);
     const contents = { agent: VTS.introduce };
 
     return res.status(200).json({ message: "success", contents, currentStage, nextStage });
