@@ -47,7 +47,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       contents.agent = await languageToggler(agent, "en");
-      console.log("응답 보내기 전 다시 영어로 번역");
+      console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
     return res.status(200).json({ message: "greeting success", user, contents, currentStage, nextStage });
@@ -95,7 +95,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       if (lang === "ko" && translatedText) {
         user = res.locals.original;
         contents.agent = VTS.whatKorean;
-        console.log("응답 보내기 전 다시 영어로 번역");
+        console.log("응답 보내기 전 : 한글 -> 영어");
       }
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
@@ -115,7 +115,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       if (lang === "ko" && translatedText) {
         user = res.locals.original;
         contents.agent = `동의해 주셔서 감사합니다.`;
-        console.log("응답 보내기 전 다시 영어로 번역");
+        console.log("응답 보내기 전 : 한글 -> 영어");
       }
       return res.status(200).json({
         message: "vts init, reply for first vts question",
@@ -195,7 +195,7 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       contents.agent = toggledAgent;
       contents.answer = toggledAnswer;
       contents.quiz = toggledQuiz;
-      console.log("응답 보내기 전 다시 영어로 번역");
+      console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
     return res.status(200).json({
@@ -218,7 +218,9 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     const session = req.session as UserSession;
     const sessionID = `${req.sessionID}`;
 
-    let { user } = req.body;
+    const translatedText = res.locals?.translatedText;
+    const lang = req.query.lang;
+    let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     // 인증
@@ -253,6 +255,19 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
+
+    if (lang === "ko" && translatedText) {
+      user = res.locals.original;
+      const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
+        languageToggler(agent, "en"),
+        languageToggler(answer, "en"),
+        languageToggler(quiz, "en"),
+      ]);
+      contents.agent = toggledAgent;
+      contents.answer = toggledAnswer;
+      contents.quiz = toggledQuiz;
+      console.log("응답 보내기 전 : 한글 -> 영어");
+    }
 
     return res.status(200).json({
       message: additional ? "reply for additional question" : "additional question end. reply for third VTS quesiton",
