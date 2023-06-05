@@ -54,10 +54,9 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
     if (lang === "ko") {
       res.locals.translatedText = await languageToggler(user, lang);
       res.locals.original = user;
-      console.log("한글을 영어로 번역 진행");
+      console.log("미들웨어에서 한글을 영어로 번역 ");
       next();
     } else {
-      console.log("영어라서 번역하지 않음");
       next();
     }
   } catch (e) {

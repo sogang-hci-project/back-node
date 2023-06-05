@@ -47,7 +47,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       contents.agent = await languageToggler(agent, "en");
-      console.log("다시 변환 실행");
+      console.log("응답 보내기 전 다시 영어로 번역");
     }
 
     return res.status(200).json({ message: "greeting success", user, contents, currentStage, nextStage });
@@ -95,7 +95,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       if (lang === "ko" && translatedText) {
         user = res.locals.original;
         contents.agent = VTS.whatKorean;
-        console.log("다시 변환 실행");
+        console.log("응답 보내기 전 다시 영어로 번역");
       }
       return res.status(200).json({
         message: "vts introduce success, please agree with starting to vts session",
@@ -115,7 +115,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       if (lang === "ko" && translatedText) {
         user = res.locals.original;
         contents.agent = `동의해 주셔서 감사합니다.`;
-        console.log("다시 변환 실행");
+        console.log("응답 보내기 전 다시 영어로 번역");
       }
       return res.status(200).json({
         message: "vts init, reply for first vts question",
@@ -147,7 +147,9 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     const sessionID = `${req.sessionID}`;
 
     //인증
-    let { user } = req.body;
+    const translatedText = res.locals?.translatedText;
+    const lang = req.query.lang;
+    let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     //인증
@@ -183,15 +185,28 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       await redisClient.set(sessionID, JSON.stringify(context));
     }
 
+    if (lang === "ko" && translatedText) {
+      user = res.locals.original;
+      const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
+        languageToggler(agent, "en"),
+        languageToggler(answer, "en"),
+        languageToggler(quiz, "en"),
+      ]);
+      contents.agent = toggledAgent;
+      contents.answer = toggledAnswer;
+      contents.quiz = toggledQuiz;
+      console.log("응답 보내기 전 다시 영어로 번역");
+    }
+
     return res.status(200).json({
       message: additional
         ? "reply for additional question"
         : "first additional question end. reply for second VTS session question",
       user,
+      contents,
       VTS_QUESTION: !additional && VTS.second,
       currentStage,
       nextStage,
-      contents,
     });
   } catch (e) {
     next(e);
