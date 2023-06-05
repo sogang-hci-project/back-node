@@ -120,9 +120,8 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       return res.status(200).json({
         message: "vts init, reply for first vts question",
         user,
-        agent,
-        VTS_QUESTION: lang === "ko" && translatedText ? VTS.firstKorean : VTS.first,
         contents,
+        VTS_QUESTION: lang === "ko" && translatedText ? VTS.firstKorean : VTS.first,
         currentStage,
         nextStage,
       });
@@ -198,13 +197,15 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
       console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
+    const VTSQuestion = lang === "ko" ? VTS.secondKorean : VTS.second;
+
     return res.status(200).json({
       message: additional
         ? "reply for additional question"
         : "first additional question end. reply for second VTS session question",
       user,
       contents,
-      VTS_QUESTION: !additional && lang === "ko" && translatedText ? VTS.secondKorean : VTS.second,
+      VTS_QUESTION: !additional && VTSQuestion,
       currentStage,
       nextStage,
     });
@@ -269,11 +270,13 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
       console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
+    const VTSQuestion = lang === "ko" ? VTS.thirdKorean : VTS.third;
+
     return res.status(200).json({
       message: additional ? "reply for additional question" : "additional question end. reply for third VTS quesiton",
       user,
       contents,
-      VTS_QUESTION: !additional && lang === "ko" && translatedText ? VTS.thirdKorean : VTS.third,
+      VTS_QUESTION: !additional && VTSQuestion,
       currentStage,
       nextStage,
     });
@@ -339,11 +342,13 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
       console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
+    const VTSQuestion = lang === "ko" ? VTS.evaluateKorean : VTS.evaluate;
+
     return res.status(200).json({
       message: additional ? "reply for third additional question" : "VTS session end",
       user,
       contents,
-      VTS_QUESTION: !additional && lang === "ko" && translatedText ? VTS.evaluateKorean : VTS.evaluate,
+      VTS_QUESTION: !additional && VTSQuestion,
       currentStage,
       nextStage,
     });
@@ -357,7 +362,9 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
     const session = req.session as UserSession;
     const sessionID = `${req.sessionID}`;
 
-    let { user } = req.body;
+    const translatedText = res.locals?.translatedText;
+    const lang = req.query.lang;
+    let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     // 인증
@@ -380,6 +387,19 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
+
+    if (lang === "ko" && translatedText) {
+      user = res.locals.original;
+      const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
+        languageToggler(agent, "en"),
+        languageToggler(answer, "en"),
+        languageToggler(quiz, "en"),
+      ]);
+      contents.agent = toggledAgent;
+      contents.answer = toggledAnswer;
+      contents.quiz = toggledQuiz;
+      console.log("응답 보내기 전 : 한글 -> 영어");
+    }
 
     return res.status(200).json({
       message: "Thank you for participating in the evaluation.",

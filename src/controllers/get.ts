@@ -45,6 +45,7 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
   try {
     const sessionID = req.sessionID;
     const session = req.session as UserSession;
+    const lang = req.query.lang;
     const currentStage = "/session/pre";
     const nextStage = "/session/greeting";
 
@@ -59,7 +60,7 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
-    const contents = { agent: VTS.introduce };
+    const contents = { agent: lang === "ko" ? VTS.introduceKorean : VTS.introduce };
 
     return res.status(200).json({ message: "success", contents, currentStage, nextStage });
   } catch (e) {
