@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-import { corsOptions, isProd, maxAge, sessionOptions } from "~/config/module";
+import { corsOptions, isProd, sessionOptions } from "~/config/module";
 import { getRouter, postRouter } from "./routes";
 import db from "~/models";
 

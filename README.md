@@ -9,6 +9,14 @@ $ yarn
 $ docker-compose up --build
 ```
 
+개발환경에서 실행
+
+```bash
+npm run dev
+```
+
+배포환경에서 실행
+
 ```bash
 npm run build
 npm run start:pm2
