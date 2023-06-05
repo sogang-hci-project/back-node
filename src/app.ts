@@ -2,20 +2,18 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-import { corsOptions, isProd, sessionOptions } from "~/config/module";
+import { corsOptions, isProd } from "~/config/module";
 import { getRouter, postRouter } from "./routes";
 import db from "~/models";
 
 const app = express();
-app.set("port", 3030);
+app.set("port", process.env.PORT || 3030);
 const port = app.get("port");
 
 if (isProd) {
   app.use(morgan("combined"));
-  sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 } else {
   app.use(morgan("dev"));
-  sessionOptions.cookie.domain = ".sgu-hci.p-e.kr";
 }
 
 app.use(cors(corsOptions));
@@ -41,7 +39,7 @@ app.listen(port, () => {
       console.log(`
       -----------------------------------
               🎉DB 연결성공🎉
-              http://localhost:${app.get("port")}
+              http://localhost:${port}
       -----------------------------------
     `)
     )
