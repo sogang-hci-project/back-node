@@ -10,5 +10,5 @@ permissions:
     mode: 755
 hooks:
   AfterInstall:
-    - location: scripts/RunResourceTests.sh
+    - location: scripts/deploy.sh
       timeout: 180
