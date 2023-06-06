@@ -8,3 +8,7 @@ permissions:
     owner: ubuntu
     group: ubuntu
     mode: 755
+hooks:
+  AfterInstall:
+    - location: scripts/RunResourceTests.sh
+      timeout: 180
