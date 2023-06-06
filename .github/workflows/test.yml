@@ -1,6 +1,6 @@
 name: test-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
-on: [merge]
+on: [push]
 jobs:
   check-bats-version:
     runs-on: ubuntu-20.04
@@ -9,5 +9,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "16"
-      - run: npm install -g bats
-      - run: bats -v
+      - name: Deploy to EC2
+        run: |
+          # EC2 인스턴스로 코드 전송 및 배포하는 스크립트 작성
+          scp -i ${{ secrets.HCI_API_PEM_KEY }} -r . ${{ secrets.HCI_API_EC2 }}:/
+          ssh -i ${{ secrets.HCI_API_PEM_KEY }} ${{ secrets.HCI_API_EC2 }} 'bash -s' << EOF
+            echo siwon-test
+          EOF
