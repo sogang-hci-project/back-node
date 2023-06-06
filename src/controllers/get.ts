@@ -40,6 +40,7 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
       sessionID,
       currentStage,
       nextStage,
+      text: "exit test",
     });
   } catch (e) {
     next(e);
