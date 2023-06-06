@@ -40,7 +40,7 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
       sessionID,
       currentStage,
       nextStage,
-      text: "코드 디플로이 이벤트별로 스크립트 파일 분리",
+      text: "사용자를 루트가 아니라 우분투로 변경 후 pm2 프로세스 실행하도록 sh 수정",
     });
   } catch (e) {
     next(e);
