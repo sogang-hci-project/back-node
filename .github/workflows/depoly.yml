@@ -43,4 +43,4 @@ jobs:
           --application-name githubaction-test
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name githubaction-test-group
-          --s3-location bucket=hci-deploy-s3,bundleType=tgz,key=$GITHUB_WORKSPACE/../src/sgu.tar.gz
+          --s3-location bucket=hci-deploy,bundleType=tgz,key=sgu/sgu.tar.gz
