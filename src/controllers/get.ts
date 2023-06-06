@@ -35,15 +35,13 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     const sessionID = uuidv4();
     const session = { user: { currentStage, nextStage } };
     await redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
-    return res
-      .status(200)
-      .json({
-        message: "session init success",
-        sessionID,
-        currentStage,
-        nextStage,
-        text: "change kill coammnd usign pkg scripts",
-      });
+    return res.status(200).json({
+      message: "session init success",
+      sessionID,
+      currentStage,
+      nextStage,
+      text: "코드 디플로이 이벤트별로 스크립트 파일 분리",
+    });
   } catch (e) {
     next(e);
   }
