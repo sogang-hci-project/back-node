@@ -21,7 +21,9 @@ jobs:
       - name: Clean temp directory
         run: |
           rm -rf *
-          sudo cp -r $GITHUB_WORKSPACE /src
+          cd $GITHUB_WORKSPACE/..
+          mkdir src
+          cp -r $GITHUB_WORKSPACE $GITHUB_WORKSPACE/../src
 
       - name: archive sgu
         run: tar cvfz ./sgu.tar.gz /src/*
