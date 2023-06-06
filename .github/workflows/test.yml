@@ -1,20 +1,19 @@
 name: test-actions
-run-name: ${{ github.actor }} is learning GitHub Actions
 on: [push]
 jobs:
-  check-bats-version:
+  HCI-version:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: "16"
       - name: Deploy to EC2
-          env:
-            HCI_API_PEM_KEY: ${{ secrets.HCI_API_PEM_KEY }}
-            HCI_API_EC2: ${{ secrets.HCI_API_EC2 }}
-          run: |
-            scp -i "$HCI_API_PEM_KEY" -r ./* "$HCI_API_EC2":/
-            ssh -i "$HCI_API_PEM_KEY" "$HCI_API_EC2" 'bash -s' << EOF
-              echo siwon-test
-            EOF
+        env:
+          HCI_API_PEM_KEY: ${{ secrets.HCI_API_PEM_KEY }}
+          HCI_API_EC2: ${{ secrets.HCI_API_EC2 }}
+        run: |
+          scp -i "$HCI_API_PEM_KEY" -r ./* "$HCI_API_EC2:/your_directory"
+          ssh -i "$HCI_API_PEM_KEY" "$HCI_API_EC2" 'bash -s' << EOF
+            echo siwon-test
+          EOF
