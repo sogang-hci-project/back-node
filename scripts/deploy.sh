@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/ubuntu/test
+cd /home/ubuntu/src/back-node
 npm i
 npm run build
 pm2 kill

@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/test
+    destination: /home/ubuntu/src/back-node
 permissions:
-  - object: /home/ubuntu/test
+  - object: /home/ubuntu/src/back-node
     owner: ubuntu
     group: ubuntu
     mode: 755
