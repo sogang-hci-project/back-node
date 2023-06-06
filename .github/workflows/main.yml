@@ -26,7 +26,7 @@ jobs:
           cp -r $GITHUB_WORKSPACE $GITHUB_WORKSPACE/../src
 
       - name: archive sgu
-        run: tar cvfz ./sgu.tar.gz /src/*
+        run: tar cvfz ./sgu.tar.gz $GITHUB_WORKSPACE/../src/*
 
       - name: AWS configure credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -36,7 +36,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./sgu.tar.gz s3://hci-deploy/sgu/
+        run: aws s3 cp --region ap-northeast-2 $GITHUB_WORKSPACE/../src/sgu.tar.gz s3://hci-deploy/sgu/
 
       - name: deploy with AWS codeDeploy
         run: aws deploy create-deployment
