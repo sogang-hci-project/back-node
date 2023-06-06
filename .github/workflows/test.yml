@@ -9,11 +9,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "16"
-      - shell: bash
+      - name: Deploy to EC2
           env:
             HCI_API_PEM_KEY: ${{ secrets.HCI_API_PEM_KEY }}
             HCI_API_EC2: ${{ secrets.HCI_API_EC2 }}
-      - name: Deploy to EC2
         run: |
           scp -i "$HCI_API_PEM_KEY" -r ./* "$HCI_API_EC2":/
           ssh -i "$HCI_API_PEM_KEY" "$HCI_API_EC2" 'bash -s' << EOF
