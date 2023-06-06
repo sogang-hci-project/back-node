@@ -13,7 +13,7 @@ jobs:
           HCI_API_PEM_KEY: ${{ secrets.HCI_API_PEM_KEY }}
           HCI_API_EC2: ${{ secrets.HCI_API_EC2 }}
         run: |
-          scp -i "$HCI_API_PEM_KEY" -r ./* "$HCI_API_EC2:/your_directory"
+          scp -i "$HCI_API_PEM_KEY" -r ./* "$HCI_API_EC2:/"
           ssh -i "$HCI_API_PEM_KEY" "$HCI_API_EC2" 'bash -s' << EOF
             echo siwon-test
           EOF
