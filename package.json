@@ -8,6 +8,7 @@
     "start": "node dist/app.js",
     "dev": "nodemon",
     "prepare": "husky install",
+    "kill:pm2": "pm2 kill",
     "start:pm2": "pm2 start ecosystem.config.js --env production",
     "lint": "tsc --noEmit && eslint src/**/*.ts --cache",
     "lint:fix": "eslint src/**/*.ts --fix"
