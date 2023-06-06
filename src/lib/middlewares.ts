@@ -1,7 +1,7 @@
 import { redisClient } from "~/lib/redis";
 import { Request, Response, NextFunction } from "express";
 import { UserSession } from "~/controllers";
-import { languageToggler } from "~/utils";
+import { deeplTranslate } from "~/utils";
 
 export const isSessionInit = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -52,7 +52,7 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     if (lang === "ko") {
-      res.locals.translatedText = await languageToggler(user, lang);
+      res.locals.translatedText = await deeplTranslate(user, lang);
       res.locals.original = user;
       console.log("미들웨어 : 한글 -> 영어 ");
       next();

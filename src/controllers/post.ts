@@ -6,7 +6,7 @@ import { LLM_SERVER } from "~/constants";
 import { Message } from "~/models";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
-import { languageToggler, updateSessionData } from "~/utils";
+import { deeplTranslate, papagoTranslate, updateSessionData } from "~/utils";
 
 interface IData {
   user: string;
@@ -46,7 +46,7 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
 
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
-      contents.agent = await languageToggler(agent, "en");
+      contents.agent = await deeplTranslate(agent, "en");
       console.log("응답 보내기 전 : 한글 -> 영어");
     }
 
@@ -187,9 +187,9 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
-        languageToggler(agent, "en"),
-        languageToggler(answer, "en"),
-        languageToggler(quiz, "en"),
+        deeplTranslate(agent, "en"),
+        deeplTranslate(answer, "en"),
+        deeplTranslate(quiz, "en"),
       ]);
       contents.agent = toggledAgent;
       contents.answer = toggledAnswer;
@@ -260,9 +260,9 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
-        languageToggler(agent, "en"),
-        languageToggler(answer, "en"),
-        languageToggler(quiz, "en"),
+        deeplTranslate(agent, "en"),
+        deeplTranslate(answer, "en"),
+        deeplTranslate(quiz, "en"),
       ]);
       contents.agent = toggledAgent;
       contents.answer = toggledAnswer;
@@ -332,9 +332,9 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
-        languageToggler(agent, "en"),
-        languageToggler(answer, "en"),
-        languageToggler(quiz, "en"),
+        deeplTranslate(agent, "en"),
+        deeplTranslate(answer, "en"),
+        deeplTranslate(quiz, "en"),
       ]);
       contents.agent = toggledAgent;
       contents.answer = toggledAnswer;
@@ -391,9 +391,9 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
     if (lang === "ko" && translatedText) {
       user = res.locals.original;
       const [toggledAgent, toggledAnswer, toggledQuiz] = await Promise.all([
-        languageToggler(agent, "en"),
-        languageToggler(answer, "en"),
-        languageToggler(quiz, "en"),
+        deeplTranslate(agent, "en"),
+        deeplTranslate(answer, "en"),
+        deeplTranslate(quiz, "en"),
       ]);
       contents.agent = toggledAgent;
       contents.answer = toggledAnswer;
@@ -407,6 +407,29 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
       contents,
       currentStage,
       nextStage,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+/**
+ * 문장 번역 요청을 위한 translate api 요청 경로
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
+
+export const postTranslate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const text = JSON.stringify(req.query.text);
+    const sourceLang = JSON.stringify(req.query.lang);
+    const translatedText = await deeplTranslate(text, sourceLang);
+
+    return res.status(200).json({
+      message: "Translation complete.",
+      translatedText,
     });
   } catch (e) {
     next(e);
