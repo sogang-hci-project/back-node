@@ -1,6 +1,6 @@
 name: test-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
-on: [push]
+on: [merge]
 jobs:
   check-bats-version:
     runs-on: ubuntu-20.04
