@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /home/ubuntu/src/back-node
-sudo npm run kill:pm2
+sudo pm2 kill
 sudo npm run start:pm2
