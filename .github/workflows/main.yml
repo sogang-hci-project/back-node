@@ -21,9 +21,10 @@ jobs:
       - name: Clean temp directory
         run: |
           rm -rf *
+          cp -r $GITHUB_WORKSPACE ./src
 
       - name: archive sgu
-        run: tar cvfz ./sgu.tar.gz *
+        run: tar cvfz ./sgu.tar.gz src/*
 
       - name: AWS configure credentials
         uses: aws-actions/configure-aws-credentials@v1
