@@ -35,7 +35,9 @@ export const getInitSession = async (req: Request, res: Response, next: NextFunc
     const sessionID = uuidv4();
     const session = { user: { currentStage, nextStage } };
     await redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
-    return res.status(200).json({ message: "session init success", sessionID, currentStage, nextStage });
+    return res
+      .status(200)
+      .json({ message: "session init success", sessionID, currentStage, nextStage, text: "hi-add-sudo command" });
   } catch (e) {
     next(e);
   }
