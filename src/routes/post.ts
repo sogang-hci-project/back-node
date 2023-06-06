@@ -18,6 +18,6 @@ postRouter.post("/vts/first", addSession, translation, postVTSFirst);
 postRouter.post("/vts/second", addSession, translation, postVTSSecond);
 postRouter.post("/vts/third", addSession, translation, postVTSThird);
 postRouter.post("/vts/end", addSession, translation, postVTSEnd);
-postRouter.post("/api/translate", postTranslate);
+postRouter.post("/util/translate", postTranslate);
 
 export default postRouter;

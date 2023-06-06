@@ -423,8 +423,8 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
 
 export const postTranslate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const text = JSON.stringify(req.query.text);
     const sourceLang = JSON.stringify(req.query.lang);
+    const text = req.body.text;
     const translatedText = await deeplTranslate(text, sourceLang);
 
     return res.status(200).json({
