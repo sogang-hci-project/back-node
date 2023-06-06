@@ -20,7 +20,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Clean temp directory
         run: |
-          rm -rf *
+          sudo rm -rf *
           cp -r $GITHUB_WORKSPACE .
 
       - name: archive sgu
@@ -29,16 +29,16 @@ jobs:
       - name: AWS configure credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: ap-northeast-2
 
       - name: upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./sgu.tar.gz s3://github-action-codedeploy-s3/archive/
+        run: aws s3 cp --region ap-northeast-2 ./sgu.tar.gz s3://hci-deploy/sgu/
 
       - name: deploy with AWS codeDeploy
         run: aws deploy create-deployment
           --application-name githubaction-test
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name githubaction-test-group
-          --s3-location bucket=github-action-codedeploy-s3,bundleType=tgz,key=archive/drcloud.tar.gz
+          --s3-location bucket=hci-deploy-s3,bundleType=tgz,key=sug/sgu.tar.gz
