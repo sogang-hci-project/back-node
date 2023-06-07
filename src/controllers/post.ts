@@ -6,7 +6,7 @@ import { LLM_SERVER } from "~/constants";
 import { Message } from "~/models";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
-import { deeplTranslate, papagoTranslate, updateSessionData } from "~/utils";
+import { clovaTextToSpeech, deeplTranslate, papagoTranslate, updateSessionData } from "~/utils";
 
 interface IData {
   user: string;
@@ -430,6 +430,21 @@ export const postTranslate = async (req: Request, res: Response, next: NextFunct
     return res.status(200).json({
       message: "Translation complete.",
       translatedText,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const postTextToSpeech = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const text = req.body.text;
+    const voice = req.body.voice;
+    const decodedAudio = await clovaTextToSpeech(text, voice);
+
+    return res.status(200).json({
+      message: "Speech-to-text complete.",
+      decodedAudio,
     });
   } catch (e) {
     next(e);

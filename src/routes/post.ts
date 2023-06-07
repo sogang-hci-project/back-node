@@ -7,6 +7,7 @@ import {
   postVTSThird,
   postVTSEnd,
   postTranslate,
+  postTextToSpeech,
 } from "~/controllers";
 import { addSession, isSessionInit, translation } from "~/lib/middlewares";
 
@@ -19,5 +20,6 @@ postRouter.post("/vts/second", addSession, translation, postVTSSecond);
 postRouter.post("/vts/third", addSession, translation, postVTSThird);
 postRouter.post("/vts/end", addSession, translation, postVTSEnd);
 postRouter.post("/util/translate", postTranslate);
+postRouter.post("/util/texttospeech", postTextToSpeech);
 
 export default postRouter;
