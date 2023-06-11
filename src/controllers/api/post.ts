@@ -5,8 +5,8 @@ import { UserSession } from "~/controllers/api/get";
 import { LLM_SERVER } from "~/constants";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
-import { clovaTextToSpeech, deeplTranslate, papagoTranslate, updateSessionData } from "~/utils";
-import { requestFreeLLMApi } from "~/lib/langchain";
+import { clovaTextToSpeech, deeplTranslate, updateSessionData } from "~/lib";
+import { requestFreeLLMApi, requestLLMApi } from "~/lib/langchain";
 
 interface IData {
   user: string;
@@ -86,10 +86,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
     updateSessionData(session, sessionID);
 
     if (additional) {
-      let context = JSON.parse(await redisClient.get(sessionID));
+      let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
       const chat = { id: context.length + 1, human: user, ai: agent };
       context.push(chat);
-      await redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
       const contents = { agent };
       if (lang === "ko" && translatedText) {
@@ -106,10 +106,10 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       });
     } else {
       const agent = "thank you for agreeing";
-      let context = JSON.parse(await redisClient.get(sessionID));
+      let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
       const chat = { id: context.length + 1, human: user, ai: `${agent} ${VTS.first}` };
       context.push(chat);
-      await redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
       const contents = { agent };
       if (lang === "ko" && translatedText) {
@@ -166,11 +166,11 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     if (additional) data.additional = true;
     else data.additional = false;
 
-    const result = await axios.post(`${LLM_SERVER}/talk`, data);
+    const result = await requestLLMApi(data);
 
-    const agent = result.data?.text;
-    const quiz = result.data?.quiz;
-    const answer = result.data?.answer;
+    const agent = result.filteredText;
+    const quiz = result.quiz;
+    const answer = result.answer;
     const contents = { agent, answer, quiz };
 
     session.user.currentStage = currentStage;
@@ -178,10 +178,10 @@ export const postVTSFirst = async (req: Request, res: Response, next: NextFuncti
     updateSessionData(session, sessionID);
 
     if (!additional) {
-      let context = JSON.parse(await redisClient.get(sessionID));
+      let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
       const chat = { id: context.length + 1, human: "", ai: VTS.second };
       context.push(chat);
-      await redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
     }
 
     if (lang === "ko" && translatedText) {
@@ -239,18 +239,18 @@ export const postVTSSecond = async (req: Request, res: Response, next: NextFunct
     if (additional) data.additional = true;
     else data.additional = false;
 
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
-    const agent = result.data?.text;
-    const quiz = result.data?.quiz;
-    const answer = result.data?.answer;
+    const result = await requestLLMApi(data);
+    const agent = result.filteredText;
+    const quiz = result.quiz;
+    const answer = result.answer;
     const contents = { agent, answer, quiz };
 
     if (!additional) {
       session.user.secondDone = true;
-      let context = JSON.parse(await redisClient.get(sessionID));
+      let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
       const chat = { id: context.length + 1, human: "", ai: VTS.third };
       context.push(chat);
-      await redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
     }
 
     session.user.currentStage = currentStage;
@@ -310,19 +310,19 @@ export const postVTSThird = async (req: Request, res: Response, next: NextFuncti
     user = `The answer to your question is ${user}`;
     if (additional) data.additional = true;
     else data.additional = false;
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
+    const result = await requestLLMApi(data);
 
-    const agent = result.data?.text;
-    const quiz = result.data?.quiz;
-    const answer = result.data?.answer;
+    const agent = result.filteredText;
+    const quiz = result.quiz;
+    const answer = result.answer;
     const contents = { agent, answer, quiz };
 
     if (!additional) {
       session.user.thirdDone = true;
-      const context = JSON.parse(await redisClient.get(sessionID));
+      const context = JSON.parse(await redisClient.get(`context:${sessionID}`));
       const chat = { id: context.length + 1, human: "", ai: VTS.evaluate };
       context.push(chat);
-      await redisClient.set(sessionID, JSON.stringify(context));
+      await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
     }
 
     session.user.currentStage = currentStage;
@@ -374,11 +374,11 @@ export const postVTSEnd = async (req: Request, res: Response, next: NextFunction
     if (additional === undefined) return res.status(400).json({ message: "incorrect query string" });
 
     const data: IData = { user, sessionID, done: true, additional };
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk`, data);
+    const result = await requestLLMApi(data);
 
-    const agent = result.data?.text;
-    const quiz = result.data?.quiz;
-    const answer = result.data?.answer;
+    const agent = result.filteredText;
+    const quiz = result.quiz;
+    const answer = result.answer;
     const contents = { agent, answer, quiz };
 
     const currentStage = `/vts/end?additional=false`;

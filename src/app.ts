@@ -16,6 +16,7 @@ if (isProd) {
 }
 
 app.use(cors(corsOptions));
+// app.use(express.static("")); if request for static resource exists, use it.
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 

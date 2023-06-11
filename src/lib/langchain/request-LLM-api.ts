@@ -1,13 +1,17 @@
-import { NextFunction, Request, Response } from "express";
-
-import { chainInitializer, redisClient } from "~/lib";
 import { dbTemplate, dbTemplateDone, dbTemplateNoQuiz, dbTemplateQA } from "~/constants";
+import { redisClient, chainInitializer } from "~/lib";
 
-export const handleChat = async (req: Request, res: Response, next: NextFunction) => {
+interface IData {
+  user: string;
+  sessionID?: string;
+  additional?: boolean;
+  done?: boolean;
+}
+
+export const requestLLMApi = async (data: IData) => {
   try {
-    const { user, sessionID, additional, done } = req.body;
+    const { user, sessionID, additional, done } = data;
 
-    if (!user || !sessionID) return res.status(400).json({ message: "incorrect LLM data" });
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
     const chat = { id: context.length + 1, human: user, ai: "" };
@@ -44,17 +48,17 @@ export const handleChat = async (req: Request, res: Response, next: NextFunction
     const questionMatch = filteredText.match(questionRegex);
     const quiz = questionMatch && questionMatch[1];
 
-    res.status(200).json({ message: "llm model router test", filteredText, answer, quiz });
+    return { message: "llm model router test", filteredText, answer, quiz };
   } catch (e) {
-    next(e);
+    console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
   }
 };
 
-export const handleChatWithFree = async (req: Request, res: Response, next: NextFunction) => {
+export const requestFreeLLMApi = async (data: IData) => {
   try {
     const chain = await chainInitializer({ free: true });
-    const { user, sessionID } = req.body;
-    if (!user || !sessionID) return res.status(400).json({ message: "incorrect LLM data" });
+    const { user, sessionID } = data;
+
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
 
@@ -67,8 +71,8 @@ export const handleChatWithFree = async (req: Request, res: Response, next: Next
     context[context.length - 1]["ai"] = text;
 
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
-    res.status(200).json({ message: "Free model connect success", text });
+    return { message: "Free model connect success", text };
   } catch (e) {
-    next(e);
+    console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
   }
 };

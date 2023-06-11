@@ -55,11 +55,11 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     const nextStage = "/session/greeting";
 
     // init context
-    let context = JSON.parse(await redisClient.get(sessionID));
+    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
     const chat = { id: context.length + 1, human: "", ai: VTS.introduce };
     context.push(chat);
-    await redisClient.set(sessionID, JSON.stringify(context));
+    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // update user session data
     session.user.currentStage = currentStage;
