@@ -2,9 +2,8 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-import { corsOptions, isProd } from "~/config/module";
-import { getRouter, postRouter } from "./routes";
-import db from "~/models";
+import { corsOptions, isProd } from "~/config";
+import { apiGetRouter, apiPostRouter, llmPostRouter } from "./routes";
 
 const app = express();
 app.set("port", process.env.PORT || 3030);
@@ -24,8 +23,9 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json(`서버 연결 성공: ${req.protocol}, ${process.env.NODE_ENV || "develop"}`);
 });
 
-app.use("/api/v1", getRouter);
-app.use("/api/v1", postRouter);
+app.use("/api/v1", apiGetRouter);
+app.use("/api/v1", apiPostRouter);
+app.use("/api/v1", llmPostRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
@@ -33,15 +33,10 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(port, () => {
-  db.sequelize
-    .sync({ alter: false })
-    .then(() =>
-      console.log(`
+  console.log(`
       -----------------------------------
               🎉DB 연결성공🎉
               http://localhost:${port}
       -----------------------------------
-    `)
-    )
-    .catch((e) => console.error(`앱 실행에서 오류가 발생 했습니다. :${e}`));
+    `);
 });
