@@ -9,7 +9,7 @@ import {
   postTranslate,
   postTextToSpeech,
 } from "~/controllers";
-import { addSession, translation } from "~/lib/middlewares";
+import { addSession, translation } from "~/middlewares";
 
 const postRouter = express.Router();
 

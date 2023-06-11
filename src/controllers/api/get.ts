@@ -3,7 +3,7 @@ import session from "express-session";
 import { redisClient } from "~/lib/redis";
 import { v4 as uuidv4 } from "uuid";
 import { VTS } from "~/constants";
-import { updateSessionData } from "~/utils";
+import { updateSessionData } from "~/lib";
 
 export interface UserSession extends session.Session {
   user: {

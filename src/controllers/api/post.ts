@@ -6,6 +6,7 @@ import { LLM_SERVER } from "~/constants";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
 import { clovaTextToSpeech, deeplTranslate, papagoTranslate, updateSessionData } from "~/utils";
+import { requestFreeLLMApi } from "~/lib/langchain";
 
 interface IData {
   user: string;
@@ -34,8 +35,8 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
     const nextStage = `/vts/init?additional=true`;
 
     const data: IData = { user, sessionID };
-    const result: AxiosResponse = await axios.post(`${LLM_SERVER}/talk-with-free`, data);
-    const agent = result.data.text;
+    const result = await requestFreeLLMApi(data);
+    const agent = result.text;
     const contents = { agent };
 
     // update session data
