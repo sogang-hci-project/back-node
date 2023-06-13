@@ -1,0 +1,43 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [develop/#cicd]
+  workflow_dispatch:
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: checkout release
+        uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      # - name: Clean temp directory
+      #   run: |
+      #     rm -rf *
+      #     cd $GITHUB_WORKSPACE/..
+      #     mkdir src
+      #     cp -r $GITHUB_WORKSPACE $GITHUB_WORKSPACE/../src
+
+      - name: archive sgu
+        run: tar cvfz sgu.tar.gz *
+
+      - name: AWS configure credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: ap-northeast-2
+
+      - name: upload to S3
+        run: aws s3 cp --region ap-northeast-2 sgu.tar.gz s3://hci-deploy/sgu/
+
+      - name: deploy with AWS codeDeploy
+        run: aws deploy create-deployment
+          --application-name githubaction-test
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name githubaction-test-group
+          --s3-location bucket=hci-deploy,bundleType=tgz,key=sgu/sgu.tar.gz

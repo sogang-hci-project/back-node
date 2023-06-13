@@ -1,0 +1,17 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/src/back-node
+permissions:
+  - object: /home/ubuntu/src/back-node
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+hooks:
+  AfterInstall:
+    - location: scripts/AfterInstall.sh
+      timeout: 180
+  ValidateService:
+    - location: scripts/ValidateService.sh
+      timeout: 180
