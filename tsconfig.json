@@ -9,10 +9,9 @@
     "target": "es6", // 컴파일된 결과가 es6
     "module": "commonjs", // 컴파일된 결과가 commonjs,
     "outDir": "dist", // 컴파일된 결과물
-    "lib": ["ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020"],
+    "lib": ["ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "dom"],
     "experimentalDecorators": true, // typeORM
     "emitDecoratorMetadata": true, // typeORM
-
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
