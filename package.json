@@ -1,8 +1,9 @@
 {
-  "name": "hci-node",
-  "version": "1.0.0",
+  "name": "hci-api",
+  "version": "2.0.0",
   "main": "index.js",
   "license": "MIT",
+  "description": "Integrate API server with LLM server",
   "scripts": {
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/app.js",
