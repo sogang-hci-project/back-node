@@ -1,9 +1,6 @@
 import { Request, NextFunction, Response } from "express";
 import session from "express-session";
-import { redisClient } from "~/lib/redis";
-import { v4 as uuidv4 } from "uuid";
-import { VTS } from "~/constants";
-import { updateSessionData } from "~/lib";
+import { initSession, preInitSession } from "~/services";
 
 export interface UserSession extends session.Session {
   user: {
@@ -29,12 +26,8 @@ export interface UserSession extends session.Session {
 
 export const getInitSession = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const currentStage = "/session/init";
-    const nextStage = "/session/pre";
+    const { sessionID, currentStage, nextStage } = await initSession();
 
-    const sessionID = uuidv4();
-    const session = { user: { currentStage, nextStage } };
-    await redisClient.set(`sess:${sessionID}`, JSON.stringify(session));
     return res.status(200).json({
       message: "session init success",
       sessionID,
@@ -50,22 +43,9 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
   try {
     const sessionID = req.sessionID;
     const session = req.session as UserSession;
-    const lang = req.query.lang;
-    const currentStage = "/session/pre";
-    const nextStage = "/session/greeting";
+    const lang = req.query.lang as string;
 
-    // init context
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
-    const chat = { id: context.length + 1, human: "", ai: VTS.introduce };
-    context.push(chat);
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
-
-    // update user session data
-    session.user.currentStage = currentStage;
-    session.user.nextStage = nextStage;
-    updateSessionData(session, sessionID);
-    const contents = { agent: lang === "ko" ? VTS.introduceKorean : VTS.introduce };
+    const { contents, currentStage, nextStage } = await preInitSession(sessionID, session, lang);
 
     return res.status(200).json({ message: "success", contents, currentStage, nextStage });
   } catch (e) {
