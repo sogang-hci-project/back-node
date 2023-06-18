@@ -3,7 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 
 import { corsOptions, isProd } from "~/config";
-import { apiGetRouter, apiPostRouter, llmPostRouter } from "./routes";
+import { apiGetRouter, apiPostRouter } from "./routes";
 
 const app = express();
 app.set("port", process.env.PORT || 3030);
@@ -26,7 +26,6 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api/v1", apiGetRouter);
 app.use("/api/v1", apiPostRouter);
-app.use("/api/v1", llmPostRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
