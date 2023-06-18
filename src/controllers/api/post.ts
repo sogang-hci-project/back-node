@@ -2,11 +2,11 @@ import axios, { AxiosResponse } from "axios";
 import { Request, Response, NextFunction } from "express";
 
 import { UserSession } from "~/controllers/api/get";
-import { LLM_SERVER } from "~/constants";
 import VTS from "~/constants/static";
 import { redisClient } from "~/lib/redis";
 import { clovaTextToSpeech, deeplTranslate, updateSessionData } from "~/lib";
 import { requestFreeLLMApi, requestLLMApi } from "~/lib/langchain";
+import { sessionGreeting } from "~/services";
 
 interface IData {
   user: string;
@@ -15,40 +15,24 @@ interface IData {
   done?: boolean;
 }
 
-/**
- * POST controller after session init
- * @param req {Request} HTTP request
- * @param res {Response} HTTP response
- * @param next {NextFunction} error handling
- */
-
 export const postSessionGreeting = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
     const translatedText = res.locals?.translatedText;
     const lang = req.query.lang;
+    const original = res.locals.original;
+    const sessionID = `${req.sessionID}`;
     let user = (lang === "ko" && translatedText) || req.body.user;
     if (!user) return res.status(400).json({ message: "incorrect API data" });
 
-    const sessionID = `${req.sessionID}`;
-    const currentStage = "/session/greeting";
-    const nextStage = `/vts/init?additional=true`;
-
-    const data: IData = { user, sessionID };
-    const result = await requestFreeLLMApi(data);
-    const agent = result.text;
-    const contents = { agent };
-
-    // update session data
-    session.user.currentStage = currentStage;
-    session.user.nextStage = nextStage;
-    updateSessionData(session, sessionID);
-
-    if (lang === "ko" && translatedText) {
-      user = res.locals.original;
-      contents.agent = await deeplTranslate(agent, "en");
-      console.log("응답 보내기 전 : 한글 -> 영어");
-    }
+    const { contents, currentStage, nextStage } = await sessionGreeting({
+      user,
+      sessionID,
+      original,
+      translatedText,
+      lang,
+      session,
+    });
 
     return res.status(200).json({ message: "greeting success", user, contents, currentStage, nextStage });
   } catch (e) {
