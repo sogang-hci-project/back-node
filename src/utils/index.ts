@@ -35,7 +35,7 @@ export async function handleContext(sessionID: string, user: string) {
   return { context: modifiedContext };
 }
 
-export function generateQuery(additional?: boolean, done?: boolean) {
+export function generateQuery(additional?: boolean, done?: boolean, context?: any[]) {
   let query;
   if (done) {
     query = `${additional ? dbTemplateQA : dbTemplateDone}\n${JSON.stringify(context)}`;
@@ -54,4 +54,9 @@ export async function fetchOpenAI(query: string) {
   });
   text = result?.text;
   return { text };
+}
+
+export async function setContextInRedis(sessionID: string, text: string, context: any[]) {
+  context[context.length - 1]["ai"] = text;
+  await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 }

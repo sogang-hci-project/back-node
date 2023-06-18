@@ -28,7 +28,7 @@ export const addSession = async (req: Request, res: Response, next: NextFunction
       });
 
     const session = JSON.parse(await redisClient.get(`sess:${sessionID}`));
-    if (!session) return res.status(400).json({ message: "there's  no session" });
+    if (!session) return res.status(400).json({ message: "there's no session" });
     req.session = session;
     req.sessionID = sessionID;
     next();
