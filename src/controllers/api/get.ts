@@ -44,6 +44,7 @@ export const getPreInitSession = async (req: Request, res: Response, next: NextF
     const sessionID = req.sessionID;
     const session = req.session as UserSession;
     const lang = req.query.lang as string;
+    if (!lang) return res.status(400).json({ message: "need lang query" });
 
     const { contents, currentStage, nextStage } = await preInitSession(sessionID, session, lang);
 

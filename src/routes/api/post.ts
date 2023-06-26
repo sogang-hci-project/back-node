@@ -1,4 +1,5 @@
 import express from "express";
+import { paraphrasePrompt, relatedQuestionPrompt } from "~/constants";
 import {
   postSessionGreeting,
   postVTSInit,
@@ -9,6 +10,7 @@ import {
   postTranslate,
   postTextToSpeech,
 } from "~/controllers";
+import { chainInitializer } from "~/lib";
 import { addSession, translation } from "~/middlewares";
 
 const postRouter = express.Router();
@@ -21,5 +23,18 @@ postRouter.post("/vts/third", addSession, translation, postVTSThird);
 postRouter.post("/vts/end", addSession, translation, postVTSEnd);
 postRouter.post("/util/translate", postTranslate);
 postRouter.post("/util/texttospeech", postTextToSpeech);
+postRouter.post("/test", async (req: any, res: any, next: any) => {
+  const { user } = req.body;
+
+  const chain = await chainInitializer({ free: true });
+  // const { prompt } = paraphrasePrompt({ user });
+  const { prompt } = relatedQuestionPrompt({ user });
+
+  const data = { prompt };
+  const result = await chain.call({ user: JSON.stringify(data) });
+  const { text } = result;
+
+  res.json({ message: "success", text });
+});
 
 export default postRouter;

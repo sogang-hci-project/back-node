@@ -45,6 +45,8 @@ export const postSessionGreeting = async (req: Request, res: Response, next: Nex
  * do not use LLM model
  */
 
+// TODO : separate service
+
 export const postVTSInit = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const session = req.session as UserSession;
@@ -78,7 +80,7 @@ export const postVTSInit = async (req: Request, res: Response, next: NextFunctio
       const contents = { agent };
       if (lang === "ko" && translatedText) {
         user = res.locals.original;
-        contents.agent = VTS.whatKorean;
+        contents.agent = VTS.suggestKorean;
         console.log("응답 보내기 전 : 한글 -> 영어");
       }
       return res.status(200).json({

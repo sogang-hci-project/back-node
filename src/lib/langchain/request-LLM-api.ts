@@ -1,3 +1,4 @@
+import { paraphrasePrompt, relatedQuestionPrompt } from "~/constants";
 import { redisClient, chainInitializer } from "~/lib";
 import { extractText, fetchOpenAI, generateQuery, handleContext, setContextInRedis } from "~/utils";
 
@@ -35,7 +36,7 @@ export const requestFreeLLMApi = async (data: IData) => {
     let chat = { id: context.length + 1, human: user, ai: "" };
     context.push(chat);
 
-    const result = await chain.call({ user: JSON.stringify(context) });
+    const result = await chain.call({ context: JSON.stringify(context) });
     const { text } = result;
 
     context[context.length - 1]["ai"] = text;
@@ -45,4 +46,29 @@ export const requestFreeLLMApi = async (data: IData) => {
   } catch (e) {
     console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
   }
+};
+
+interface Props {
+  user: string;
+}
+
+export const requestRelatedAnswer = async ({ user }: Props) => {
+  const chain = await chainInitializer({ free: true });
+  const { prompt } = relatedQuestionPrompt({ user });
+  const data = { prompt };
+  const result = await chain.call({ user: JSON.stringify(data) });
+  const { text } = result;
+
+  return { text };
+};
+
+export const requestParaphrase = async ({ user }: Props) => {
+  const chain = await chainInitializer({ free: true });
+  const { prompt } = paraphrasePrompt({ user });
+
+  const data = { prompt };
+  const result = await chain.call({ user: JSON.stringify(data) });
+  const { text } = result;
+
+  return { text };
 };
