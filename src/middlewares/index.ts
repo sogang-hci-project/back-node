@@ -20,6 +20,10 @@ export const isSessionInit = async (req: Request, res: Response, next: NextFunct
  */
 
 export const addSession = async (req: Request, res: Response, next: NextFunction) => {
+  if (req.url === "/greeting/1") {
+    next();
+    return;
+  }
   try {
     const sessionID = req.query.sessionID as string;
     if (!sessionID)

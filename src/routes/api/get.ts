@@ -1,6 +1,6 @@
 import express from "express";
 import { get } from "http";
-import { getInitSession, getPreInitSession } from "~/controllers";
+import { getInitSession, getPreInitSession, greeting } from "~/controllers";
 import { addSession } from "~/middlewares";
 
 const getRouter = express.Router();
