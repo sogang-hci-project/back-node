@@ -15,6 +15,16 @@ import { addSession, translation } from "~/middlewares";
 
 const postRouter = express.Router();
 
+postRouter.post("/greeting/:id", addSession, translation, (req, res, next) => {
+  return res.status(200).json({ message: "connect success" });
+});
+postRouter.post("/conversation/:id", addSession, translation, (req, res, next) => {
+  return res.status(200).json({ message: "connect success" });
+});
+postRouter.post("/end/:id", addSession, translation, (req, res, next) => {
+  return res.status(200).json({ message: "connect success" });
+});
+
 postRouter.post("/session/greeting", addSession, translation, postSessionGreeting);
 postRouter.post("/vts/init", addSession, translation, postVTSInit);
 postRouter.post("/vts/first", addSession, translation, postVTSFirst);
