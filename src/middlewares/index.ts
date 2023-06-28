@@ -20,7 +20,7 @@ export const isSessionInit = async (req: Request, res: Response, next: NextFunct
  */
 
 export const addSession = async (req: Request, res: Response, next: NextFunction) => {
-  if (req.url === "/greeting/1") {
+  if (req.url === "/greeting/0") {
     next();
     return;
   }
@@ -50,7 +50,8 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
     const lang = req.query.lang as string;
     const user = req.body.user;
     const typeOfLang = ["en", "ko"];
-    if (!lang || !typeOfLang.includes(lang)) return res.status(400).json({ message: "need lang query string" });
+    if ((!lang || !typeOfLang.includes(lang)) && req.url !== "/greeting/0")
+      return res.status(400).json({ message: "need lang query string" });
     if (!user) return res.status(400).json({ message: "incorrect data" });
 
     if (lang === "ko") {
