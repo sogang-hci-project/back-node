@@ -3,14 +3,14 @@ interface Stage {
   nextStage: string;
 }
 
-export interface ConversationResponseOne extends Stage {
-  sessionID: string;
-}
-
-export interface ConversationResponseTwo extends Stage {
-  contents: {
-    agent: string;
+export interface BaseConversationResponse extends Stage {
+  contents?: {
+    agent?: string;
   };
 }
 
-export type ConversationResponse = Partial<ConversationResponseOne> | Partial<ConversationResponseTwo>;
+// for extension divide all stages
+export interface ConversationResponseZero extends BaseConversationResponse {}
+export interface ConversationResponseOne extends BaseConversationResponse {}
+
+export type ConversationResponse = Partial<ConversationResponseZero> | Partial<ConversationResponseOne>;

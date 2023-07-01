@@ -1,6 +1,6 @@
-import { paraphrasePrompt, relatedQuestionPrompt } from "~/constants";
+import { getParaphrasePrompt, getRelatedQuestionPrompt } from "~/constants";
 import { redisClient, chainInitializer } from "~/lib";
-import { extractText, fetchOpenAI, generateQuery, handleContext, setContextInRedis } from "~/utils";
+import { extractText, fetchOpenAI, generateQuery, getContext, setContextInRedis } from "~/utils";
 
 interface IData {
   user: string;
@@ -13,7 +13,7 @@ export const requestLLMApi = async (data: IData) => {
   try {
     const { user, sessionID, additional, done } = data;
 
-    const { context } = await handleContext(sessionID, user);
+    const { context } = await getContext(sessionID, user);
     const { query } = generateQuery(additional, done, context);
     const { text } = await fetchOpenAI(query);
     await setContextInRedis(sessionID, text, context);
@@ -54,7 +54,7 @@ interface Props {
 
 export const requestRelatedAnswer = async ({ user }: Props) => {
   const chain = await chainInitializer({ free: true });
-  const { prompt } = relatedQuestionPrompt({ user });
+  const { prompt } = getRelatedQuestionPrompt({ user });
   const data = { prompt };
   const result = await chain.call({ user: JSON.stringify(data) });
   const { text } = result;
@@ -64,7 +64,7 @@ export const requestRelatedAnswer = async ({ user }: Props) => {
 
 export const requestParaphrase = async ({ user }: Props) => {
   const chain = await chainInitializer({ free: true });
-  const { prompt } = paraphrasePrompt({ user });
+  const { prompt } = getParaphrasePrompt({ user });
 
   const data = { prompt };
   const result = await chain.call({ user: JSON.stringify(data) });
