@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { conversation_zero, conversation_one } from "~/services";
-import { ConversationResponseZero, ConversationResponse, UserSession, ConversationResponseOne } from "~/types";
+import { conversation_zero, conversation_one, conversation_two, conversation_loop } from "~/services";
+import {
+  ConversationResponseZero,
+  ConversationResponse,
+  UserSession,
+  ConversationResponseOne,
+  ConversationResponseTwo,
+} from "~/types";
 
 interface Props {
   sessionID: string;
@@ -35,8 +41,16 @@ export const conversation = async (req: Request, res: Response, next: NextFuncti
       (data as ConversationResponseOne).currentStage = currentStage;
       (data as ConversationResponseOne).nextStage = nextStage;
     } else if (id === "2") {
+      const { currentStage, nextStage, contents } = await conversation_two({ sessionID, session, lang, user: _user });
+      (data as ConversationResponseTwo).contents = contents;
+      (data as ConversationResponseTwo).currentStage = currentStage;
+      (data as ConversationResponseTwo).nextStage = nextStage;
+    } else {
+      // loop
+      const {} = await conversation_loop({ id, sessionID, session, lang, user: _user });
+      return res.status(200).json({ message: "루프 진입 성공!" });
     }
-    res.locals.translation = { data };
+    res.locals.finalTranslation = { data };
     next();
     // return res.status(200).json({ message: `conversation ${id} connect success`, data });
   } catch (e) {
