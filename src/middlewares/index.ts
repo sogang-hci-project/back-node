@@ -45,7 +45,7 @@ export const addSession = async (req: Request, res: Response, next: NextFunction
  * translate using DeepL API
  */
 
-export const translation = async (req: Request, res: Response, next: NextFunction) => {
+export const initTranslation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const lang = req.query.lang as string;
     const user = req.body.user;
@@ -71,7 +71,6 @@ export const finalTranslation = async (req: Request, res: Response, next: NextFu
   try {
     const lang = req.query.lang as string;
     const { data } = res.locals.translation;
-    console.log("🔥🔥🔥 넘어온 데이터 있는지 확인, 🔥🔥🔥🔥", data, lang);
 
     if (lang === "ko") {
       const { agent } = data.contents;

@@ -1,9 +1,9 @@
 import express from "express";
 import { conversation } from "~/controllers";
-import { addSession, finalTranslation, translation } from "~/middlewares";
+import { addSession, finalTranslation, initTranslation } from "~/middlewares";
 
 const conversationRouter = express.Router();
 
-conversationRouter.post("/conversation/:id", addSession, translation, conversation, finalTranslation);
+conversationRouter.post("/conversation/:id", addSession, initTranslation, conversation, finalTranslation);
 
 export default conversationRouter;
