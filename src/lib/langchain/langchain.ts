@@ -10,7 +10,7 @@ export const model = new ChatOpenAI({
   temperature: 0, // 0 is best for chat bot
   openAIApiKey,
   verbose: true,
-  streaming: true,
+  streaming: false,
   callbacks: [
     {
       handleLLMNewToken(token: string) {

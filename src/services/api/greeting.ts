@@ -51,7 +51,7 @@ export const greeting_one = async (sessionID: string, session: UserSession, lang
 export const greeting_two = async (sessionID: string, session: UserSession, lang: string, user: string) => {
   try {
     const currentStage = "/greeting/2";
-    const nextStage = "/conversation/1";
+    const nextStage = "/conversation/0";
     // init context
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];

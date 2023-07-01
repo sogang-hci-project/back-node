@@ -5,7 +5,6 @@ import { GreetingResponse, GreetingResponseOne, GreetingResponseTwo, UserSession
 interface Props {
   sessionID: string;
   session: UserSession;
-  lang: string;
 }
 
 const getSessionData = (req: Request): Props => {
@@ -13,7 +12,7 @@ const getSessionData = (req: Request): Props => {
   const session = req.session as UserSession;
   const lang = req.query.lang as string;
 
-  return { sessionID, session, lang };
+  return { sessionID, session };
 };
 
 export const greeting = async (req: Request, res: Response, next: NextFunction) => {
@@ -43,6 +42,8 @@ export const greeting = async (req: Request, res: Response, next: NextFunction) 
       (data as GreetingResponseTwo).currentStage = currentStage;
       (data as GreetingResponseTwo).nextStage = nextStage;
     }
+
+    next();
     return res.status(200).json({ message: `greeting ${id} connect success`, data });
   } catch (e) {
     console.error("", e);

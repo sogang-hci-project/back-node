@@ -24,7 +24,7 @@ interface IContext {
   id: number;
 }
 
-export async function handleContext(sessionID: string, user: string) {
+export async function getContext(sessionID: string, user: string) {
   let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
   if (!context) context = [];
   let chat = { id: context.length + 1, human: user, ai: "" };

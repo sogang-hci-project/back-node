@@ -3,7 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 
 import { corsOptions, isProd } from "~/config";
-import { greetingRouter } from "./routes";
+import { greetingRouter, conversationRouter } from "./routes";
 
 const app = express();
 app.set("port", process.env.PORT || 3030);
@@ -28,6 +28,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 // app.use("/api/v1", apiPostRouter);
 
 app.use("/api/v1", greetingRouter);
+app.use("/api/v1", conversationRouter);
 
 // error handler
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
