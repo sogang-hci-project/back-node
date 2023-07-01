@@ -1,74 +1,74 @@
-import { paraphrasePrompt, relatedQuestionPrompt } from "~/constants";
-import { redisClient, chainInitializer } from "~/lib";
-import { extractText, fetchOpenAI, generateQuery, handleContext, setContextInRedis } from "~/utils";
+// import { getParaphrasePrompt, getRelatedQuestionPrompt } from "~/constants";
+// import { redisClient, chainInitializer } from "~/lib";
+// import { extractText, fetchOpenAI, generateQuery, getContext, setContextInRedis } from "~/utils";
 
-interface IData {
-  user: string;
-  sessionID?: string;
-  additional?: boolean;
-  done?: boolean;
-}
+// interface IData {
+//   user: string;
+//   sessionID?: string;
+//   additional?: boolean;
+//   done?: boolean;
+// }
 
-export const requestLLMApi = async (data: IData) => {
-  try {
-    const { user, sessionID, additional, done } = data;
+// export const requestLLMApi = async (data: IData) => {
+//   try {
+//     const { user, sessionID, additional, done } = data;
 
-    const { context } = await handleContext(sessionID, user);
-    const { query } = generateQuery(additional, done, context);
-    const { text } = await fetchOpenAI(query);
-    await setContextInRedis(sessionID, text, context);
-    const { filteredText, answer, quiz } = extractText(text);
+//     const { context } = await getContext(sessionID, user);
+//     const { query } = generateQuery(additional, done, context);
+//     const { text } = await fetchOpenAI(query);
+//     await setContextInRedis(sessionID, text, context);
+//     const { filteredText, answer, quiz } = extractText(text);
 
-    return { message: "llm model router test", filteredText, answer, quiz };
-  } catch (e) {
-    console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
-  }
-};
+//     return { message: "llm model router test", filteredText, answer, quiz };
+//   } catch (e) {
+//     console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
+//   }
+// };
 
-export const requestFreeLLMApi = async (data: IData) => {
-  try {
-    const chain = await chainInitializer({ free: true });
-    const { user, sessionID } = data;
+// export const requestFreeLLMApi = async (data: IData) => {
+//   try {
+//     const chain = await chainInitializer({ free: true });
+//     const { user, sessionID } = data;
 
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
+//     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
+//     if (!context) context = [];
 
-    let chat = { id: context.length + 1, human: user, ai: "" };
-    context.push(chat);
+//     let chat = { id: context.length + 1, human: user, ai: "" };
+//     context.push(chat);
 
-    const result = await chain.call({ context: JSON.stringify(context) });
-    const { text } = result;
+//     const result = await chain.call({ context: JSON.stringify(context) });
+//     const { text } = result;
 
-    context[context.length - 1]["ai"] = text;
+//     context[context.length - 1]["ai"] = text;
 
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
-    return { message: "Free model connect success", text };
-  } catch (e) {
-    console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
-  }
-};
+//     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+//     return { message: "Free model connect success", text };
+//   } catch (e) {
+//     console.error("🔥🔥 error occurs in FREE LLM API function 🔥🔥", e);
+//   }
+// };
 
-interface Props {
-  user: string;
-}
+// interface Props {
+//   user: string;
+// }
 
-export const requestRelatedAnswer = async ({ user }: Props) => {
-  const chain = await chainInitializer({ free: true });
-  const { prompt } = relatedQuestionPrompt({ user });
-  const data = { prompt };
-  const result = await chain.call({ user: JSON.stringify(data) });
-  const { text } = result;
+// export const requestRelatedAnswer = async ({ user }: Props) => {
+//   const chain = await chainInitializer({ free: true });
+//   const { prompt } = getRelatedQuestionPrompt({ user });
+//   const data = { prompt };
+//   const result = await chain.call({ user: JSON.stringify(data) });
+//   const { text } = result;
 
-  return { text };
-};
+//   return { text };
+// };
 
-export const requestParaphrase = async ({ user }: Props) => {
-  const chain = await chainInitializer({ free: true });
-  const { prompt } = paraphrasePrompt({ user });
+// export const requestParaphrase = async ({ user }: Props) => {
+//   const chain = await chainInitializer({ free: true });
+//   const { prompt } = getParaphrasePrompt({ user });
 
-  const data = { prompt };
-  const result = await chain.call({ user: JSON.stringify(data) });
-  const { text } = result;
+//   const data = { prompt };
+//   const result = await chain.call({ user: JSON.stringify(data) });
+//   const { text } = result;
 
-  return { text };
-};
+//   return { text };
+// };
