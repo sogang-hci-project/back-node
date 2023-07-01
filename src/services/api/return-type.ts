@@ -86,7 +86,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${VTS.VTS_TWO_EN}`;
+    const agent = `${result[0].text}${result[1].text}${result[2].text}${VTS.VTS_THREE_EN}`;
 
     // update context
     context[context.length - 1].ai = agent;
@@ -131,7 +131,12 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
     ]);
 
+    console.log("🔥🔥추가 질문 생성 확인🔥🔥", result[3].text);
+
     const agent = `${result[0].text}${result[1].text}${result[2].text}${result[3].text}`;
+    context[context.length - 1].ai = agent;
+    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+
     return { agent };
   } catch (e) {
     console.error("🔥return additional question error🔥", e);

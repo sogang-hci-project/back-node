@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { conversation_zero, conversation_one, conversation_two, conversation_loop } from "~/services";
 import {
-  ConversationResponseZero,
-  ConversationResponse,
-  UserSession,
-  ConversationResponseOne,
-  ConversationResponseTwo,
-} from "~/types";
+  conversationZero,
+  conversationOne,
+  conversationTwo,
+  conversationLoop,
+  conversationThree,
+  conversationFour,
+  conversationFive,
+} from "~/services";
+import { UserSession, BaseConversationResponse } from "~/types";
 
 interface Props {
   sessionID: string;
@@ -28,27 +30,50 @@ export const conversation = async (req: Request, res: Response, next: NextFuncti
     const { user } = req.body;
     const { sessionID, session } = getSessionData(req);
     const _user = lang === "ko" ? res.locals.translatedText : user;
-    const data: ConversationResponse = {};
+    const data: BaseConversationResponse = { contents: {}, currentStage: "", nextStage: "" };
 
     if (id === "0") {
-      const { currentStage, nextStage, contents } = await conversation_zero({ sessionID, session, lang, user: _user });
-      (data as ConversationResponseZero).contents = contents;
-      (data as ConversationResponseZero).currentStage = currentStage;
-      (data as ConversationResponseZero).nextStage = nextStage;
+      const { currentStage, nextStage, contents } = await conversationZero({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
     } else if (id === "1") {
-      const { currentStage, nextStage, contents } = await conversation_one({ sessionID, session, lang, user: _user });
-      (data as ConversationResponseOne).contents = contents;
-      (data as ConversationResponseOne).currentStage = currentStage;
-      (data as ConversationResponseOne).nextStage = nextStage;
+      const { currentStage, nextStage, contents } = await conversationOne({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
     } else if (id === "2") {
-      const { currentStage, nextStage, contents } = await conversation_two({ sessionID, session, lang, user: _user });
-      (data as ConversationResponseTwo).contents = contents;
-      (data as ConversationResponseTwo).currentStage = currentStage;
-      (data as ConversationResponseTwo).nextStage = nextStage;
+      const { currentStage, nextStage, contents } = await conversationTwo({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
+    } else if (id === "3") {
+      const { currentStage, nextStage, contents } = await conversationThree({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
+    } else if (id === "4") {
+      const { currentStage, nextStage, contents } = await conversationFour({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
+    } else if (id === "5") {
+      const { currentStage, nextStage, contents } = await conversationFive({ sessionID, session, lang, user: _user });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
     } else {
-      // loop
-      const {} = await conversation_loop({ id, sessionID, session, lang, user: _user });
-      return res.status(200).json({ message: "루프 진입 성공!" });
+      // additional loop
+      const { currentStage, nextStage, contents } = await conversationLoop({
+        id,
+        sessionID,
+        session,
+        lang,
+        user: _user,
+      });
+      data.contents = contents;
+      data.currentStage = currentStage;
+      data.nextStage = nextStage;
     }
     res.locals.finalTranslation = { data };
     next();

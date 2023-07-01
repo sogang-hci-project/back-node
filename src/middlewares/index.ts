@@ -77,7 +77,6 @@ export const finalTranslation = async (req: Request, res: Response, next: NextFu
     if (lang === "ko") {
       const { agent } = data.contents;
       const result = await deeplTranslate(agent, "en");
-      console.log("번역된 결과", result);
       data.contents.agent = result;
       console.log("미들웨어 : 한글 -> 영어 ");
     }

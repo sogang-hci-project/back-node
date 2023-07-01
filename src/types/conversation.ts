@@ -1,20 +1,7 @@
-interface Stage {
+export interface BaseConversationResponse {
   currentStage: string;
   nextStage: string;
-}
-
-export interface BaseConversationResponse extends Stage {
   contents?: {
     agent?: string;
   };
 }
-
-// TODO : integrate type interface
-export interface ConversationResponseZero extends BaseConversationResponse {}
-export interface ConversationResponseOne extends BaseConversationResponse {}
-export interface ConversationResponseTwo extends BaseConversationResponse {}
-
-export type ConversationResponse =
-  | Partial<ConversationResponseZero>
-  | Partial<ConversationResponseOne>
-  | Partial<ConversationResponseTwo>;

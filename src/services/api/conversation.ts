@@ -1,7 +1,7 @@
 import { VTS } from "~/constants";
 import { redisClient, updateSessionData } from "~/lib";
 import { UserSession } from "~/types";
-import { returnAdditionalQuestion, returnVTS_two } from "./return-type";
+import { returnAdditionalQuestion, returnVTS_three, returnVTS_two } from "./return-type";
 
 interface Props {
   sessionID?: string;
@@ -11,7 +11,7 @@ interface Props {
   id?: string;
 }
 
-export const conversation_zero = async ({ sessionID, session, lang, user }: Props) => {
+export const conversationZero = async ({ sessionID, session, lang, user }: Props) => {
   try {
     const currentStage = "/conversation/0";
     const nextStage = "/conversation/1";
@@ -30,14 +30,14 @@ export const conversation_zero = async ({ sessionID, session, lang, user }: Prop
 
     return { contents, currentStage, nextStage };
   } catch (e) {
-    console.error("🔥 conversation_zero service error 🔥", e);
+    console.error("🔥 conversation zero service error 🔥", e);
   }
 };
 
-export const conversation_one = async ({ sessionID, session, user }: Props) => {
+export const conversationOne = async ({ sessionID, session, user }: Props) => {
   try {
     const currentStage = "/conversation/1";
-    const nextStage = "/conversation/2";
+    const nextStage = "/conversation/1-1";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -48,39 +48,89 @@ export const conversation_one = async ({ sessionID, session, user }: Props) => {
 
     return { contents, currentStage, nextStage };
   } catch (e) {
-    console.error("🔥 conversation_one service error 🔥", e);
+    console.error("🔥 conversation one service error 🔥", e);
   }
 };
 
-export const conversation_two = async ({ sessionID, session, user }: Props) => {
+export const conversationTwo = async ({ sessionID, session, user }: Props) => {
   try {
     const currentStage = "/conversation/2";
-    const nextStage = "/conversation/1-1";
+    const nextStage = "/conversation/3";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnAdditionalQuestion({ sessionID, user });
+    const { agent } = await returnVTS_three({ sessionID, user });
     const contents = { agent };
 
     return { contents, currentStage, nextStage };
   } catch (e) {
-    console.error("🔥 conversation_one service error 🔥", e);
+    console.error("🔥 conversation two service error 🔥", e);
+  }
+};
+export const conversationThree = async ({ sessionID, session, user }: Props) => {
+  try {
+    const currentStage = "/conversation/3";
+    const nextStage = "/conversation/2-1";
+    session.user.currentStage = currentStage;
+    session.user.nextStage = nextStage;
+    updateSessionData(session, sessionID);
+
+    const { agent } = await returnVTS_two({ sessionID, user });
+    const contents = { agent };
+
+    return { contents, currentStage, nextStage };
+  } catch (e) {
+    console.error("🔥 conversation three service error 🔥", e);
+  }
+};
+export const conversationFour = async ({ sessionID, session, user }: Props) => {
+  try {
+    const currentStage = "/conversation/4";
+    const nextStage = "/conversation/5";
+    session.user.currentStage = currentStage;
+    session.user.nextStage = nextStage;
+    updateSessionData(session, sessionID);
+
+    const { agent } = await returnVTS_three({ sessionID, user });
+    const contents = { agent };
+
+    return { contents, currentStage, nextStage };
+  } catch (e) {
+    console.error("🔥 conversation four service error 🔥", e);
+  }
+};
+
+export const conversationFive = async ({ sessionID, session, user }: Props) => {
+  try {
+    const currentStage = "/conversation/5";
+    const nextStage = "/conversation/3-1";
+    session.user.currentStage = currentStage;
+    session.user.nextStage = nextStage;
+    updateSessionData(session, sessionID);
+
+    const { agent } = await returnVTS_two({ sessionID, user });
+    const contents = { agent };
+
+    return { contents, currentStage, nextStage };
+  } catch (e) {
+    console.error("🔥 conversation five service error 🔥", e);
   }
 };
 
 const getNextStage = (id: string) => {
   if (id === "1-1") return "1-2";
   else if (id === "1-2") return "1-3";
-  else if (id === "1-3") return "2-1";
+  else if (id === "1-3") return "2";
   else if (id === "2-1") return "2-2";
   else if (id === "2-2") return "2-3";
-  else if (id === "2-3") return "3-1";
+  else if (id === "2-3") return "4";
   else if (id === "3-1") return "3-2";
   else if (id === "3-2") return "3-3";
+  else if (id === "3-3") return "end";
 };
 
-export const conversation_loop = async ({ sessionID, session, user, id }: Props) => {
+export const conversationLoop = async ({ sessionID, session, user, id }: Props) => {
   try {
     const currentStage = `/conversation/${id}`;
     const nextStage = `/conversation/${getNextStage(id)}`;
