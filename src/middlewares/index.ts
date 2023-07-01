@@ -63,6 +63,7 @@ export const initTranslation = async (req: Request, res: Response, next: NextFun
       next();
     }
   } catch (e) {
+    console.error("🔥 init translation error🔥", e);
     next(e);
   }
 };
@@ -70,7 +71,8 @@ export const initTranslation = async (req: Request, res: Response, next: NextFun
 export const finalTranslation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const lang = req.query.lang as string;
-    const { data } = res.locals.translation;
+    const { data } = res.locals.finalTranslation;
+    if (!data) return res.status(400).json({ message: "need data for final translating " });
 
     if (lang === "ko") {
       const { agent } = data.contents;
@@ -81,6 +83,7 @@ export const finalTranslation = async (req: Request, res: Response, next: NextFu
     }
     return res.status(200).json({ message: "success", data });
   } catch (e) {
+    console.error("🔥final translation error🔥", e);
     next(e);
   }
 };
