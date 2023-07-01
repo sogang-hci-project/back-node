@@ -52,7 +52,7 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
     const typeOfLang = ["en", "ko"];
     if ((!lang || !typeOfLang.includes(lang)) && req.url !== "/greeting/0")
       return res.status(400).json({ message: "need lang query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+    if (req.url !== "/greeting/0" && !user) return res.status(400).json({ message: "incorrect data" });
 
     if (lang === "ko") {
       res.locals.translatedText = await deeplTranslate(user, lang);
@@ -62,6 +62,25 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
     } else {
       next();
     }
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const finalTranslation = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const lang = req.query.lang as string;
+    const { data } = res.locals.translation;
+    console.log("🔥🔥🔥 넘어온 데이터 있는지 확인, 🔥🔥🔥🔥", data, lang);
+
+    if (lang === "ko") {
+      const { agent } = data.contents;
+      const result = await deeplTranslate(agent, "en");
+      console.log("번역된 결과", result);
+      data.contents.agent = result;
+      console.log("미들웨어 : 한글 -> 영어 ");
+    }
+    return res.status(200).json({ message: "success", data });
   } catch (e) {
     next(e);
   }
