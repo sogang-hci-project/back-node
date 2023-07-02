@@ -10,7 +10,6 @@ interface Props {
 const getSessionData = (req: Request): Props => {
   const sessionID = req.sessionID;
   const session = req.session as UserSession;
-  const lang = req.query.lang as string;
 
   return { sessionID, session };
 };
@@ -46,7 +45,7 @@ export const greeting = async (req: Request, res: Response, next: NextFunction) 
     next();
     return res.status(200).json({ message: `greeting ${id} connect success`, data });
   } catch (e) {
-    console.error("", e);
+    console.error("🔥 greeting controller error occur 🔥", e);
     next();
   }
 };

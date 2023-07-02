@@ -3,10 +3,11 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { LLMChain } from "langchain/chains";
 import { PromptTemplate } from "langchain/prompts";
 
-import { OPENAI_API_KEY as openAIApiKey, freeTalkTemplate } from "~/constants";
+import { OPENAI_API_KEY as openAIApiKey } from "~/constants";
 import loadVectorStore from "~/lib/langchain/load-local-db";
+import { SeperateSentenceTemplate, freeTalkTemplate } from "~/prompts";
 
-export const model = new ChatOpenAI({
+export const llm = new ChatOpenAI({
   temperature: 0, // 0 is best for chat bot
   openAIApiKey,
   verbose: true,
@@ -20,35 +21,32 @@ export const model = new ChatOpenAI({
   ],
 });
 
-export async function chainInitializer({ free }: { free: boolean }) {
-  const vectorStore = await loadVectorStore();
-  let chain;
-  const { prompt: template } = freeTalkTemplate();
-
-  if (free) {
-    const prompt = new PromptTemplate({
-      template: template,
-      inputVariables: ["context"],
-    });
-    chain = new LLMChain({ llm: model, prompt: prompt });
-  } else {
-    chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
-  }
-  return chain;
+interface Props {
+  type?: string;
+  sentences?: string;
 }
 
-//template:"separate below sentence. this made me feel a bit overwhelmed because there's lots of elements going on so it was kind of hard to catch it like catch the meanings behind it at first look but the more I look into it, it's getting there I can see people dead, I mean not dead but like lie on the floor and someone trying to eat the ball I think and the light bulb kind of represents the sun or the eye. Yeah I think that's it.",
-export async function separateSentence() {
+export async function chainInitializer({ type, sentences }: Props) {
   const vectorStore = await loadVectorStore();
   let chain;
-  // TODO : separate template
-  const { prompt: template } = freeTalkTemplate();
 
-  const prompt = new PromptTemplate({
-    template: template,
-    inputVariables: ["context"],
-  });
-  chain = new LLMChain({ llm: model, prompt: prompt });
-
+  if (type === "free") {
+    const { template } = freeTalkTemplate();
+    const prompt = new PromptTemplate({
+      template,
+      inputVariables: ["user"],
+    });
+    chain = new LLMChain({ llm, prompt });
+  } else if (type === "seperate") {
+    const { template } = SeperateSentenceTemplate({ sentences });
+    const prompt = new PromptTemplate({
+      template,
+      inputVariables: ["sentences"],
+    });
+    chain = new LLMChain({ llm, prompt: prompt });
+  } else {
+    // using Vector Store
+    chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
+  }
   return chain;
 }

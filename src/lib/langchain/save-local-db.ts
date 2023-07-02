@@ -5,10 +5,9 @@ import { Document } from "langchain/document";
 import { HNSWLib } from "langchain/vectorstores/hnswlib";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 
-import { OPENAI_API_KEY as openAIApiKey } from "~/constants/env";
-import { DATA_STORE_PATH } from "~/constants";
+import { DATA_STORE_PATH, OPENAI_API_KEY as openAIApiKey } from "~/constants";
 
-export const folderPath = `${__dirname}/../../static/markdown`;
+export const folderPath = `${__dirname}/../../datas/markdown`;
 
 export function getAllMarkDownFiles(folderPath: string) {
   let filePaths: any = [];
@@ -38,7 +37,7 @@ const filePaths = getAllMarkDownFiles(folderPath);
  * const filePaths ['path1','path2',...]
  * only directly call this file,
  * main function execute
- * Save vector db in DATA_STORE path for resuing vector db with static markdown files
+ * Save vector db in DATA_STORE path for reusing vector db with static markdown files
  */
 
 async function main() {

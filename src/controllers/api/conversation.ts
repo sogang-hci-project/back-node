@@ -63,7 +63,7 @@ export const conversation = async (req: Request, res: Response, next: NextFuncti
       data.currentStage = currentStage;
       data.nextStage = nextStage;
     } else {
-      // additional loop
+      // additional question loop
       const { currentStage, nextStage, contents } = await conversationLoop({
         id,
         sessionID,

@@ -1,11 +1,11 @@
+import { MESSAGE } from "~/datas";
+import { chainInitializer, redisClient } from "~/lib";
 import {
-  VTS,
+  getAdditionalQuestion,
   getAnswerWithVectorDBPrompt,
   getParaphrasePrompt,
   getRelatedQuestionPrompt,
-  getAdditionalQuestion,
-} from "~/constants";
-import { chainInitializer, redisClient } from "~/lib";
+} from "~/prompts";
 import { UserSession } from "~/types";
 
 interface Props {
@@ -32,7 +32,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -45,7 +45,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${VTS.VTS_TWO_EN}`;
+    const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_TWO_EN}`;
 
     // update context
     context[context.length - 1].ai = agent;
@@ -73,7 +73,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -86,7 +86,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${VTS.VTS_THREE_EN}`;
+    const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_THREE_EN}`;
 
     // update context
     context[context.length - 1].ai = agent;
@@ -115,7 +115,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
