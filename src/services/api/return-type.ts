@@ -66,10 +66,12 @@ const getContext = async ({ sessionID, user }: Props) => {
   try {
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
+    const previousQuestion = context[context.length - 1].ai;
+    const answer = user;
     const chat = { id: context.length + 1, human: user, ai: `` };
     context.push(chat);
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
-    return { context };
+    return { context, previousQuestion, answer };
   } catch (e) {
     console.error("🔥 getContext function error 🔥", e);
   }
@@ -84,7 +86,7 @@ const getContext = async ({ sessionID, user }: Props) => {
 export const returnVTS_two = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    const { context } = await getContext({ sessionID, user });
+    const { context, previousQuestion, answer } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
@@ -98,6 +100,8 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
     ]);
 
     const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_TWO_EN}`;
@@ -121,7 +125,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
 export const returnVTS_three = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    const { context } = await getContext({ sessionID, user });
+    const { context, previousQuestion, answer } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
@@ -135,6 +139,8 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
     ]);
 
     const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_THREE_EN}`;
@@ -159,7 +165,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
 export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    const { context } = await getContext({ sessionID, user });
+    const { context, previousQuestion, answer } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
@@ -176,12 +182,14 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
     ]);
 
-    // VTS_TWO_EN: `What else can you find in the painting?`,
-    // let additionalQuestion = "What else can you find in the painting?"; // similarity is 1.00
-    // let additionalQuestion = "What can you find in the paintings?"; // similarity is 0.88
-    // let additionalQuestion = "What can you find in the city?"; // similarity is 0.45
+    // TODO : Add logic
+    //console.log("🔥🔥 질문이 있는지 확인 🔥🔥 \n", result[4]);
+    //console.log("🔥🔥 답변을 했는지 확인 🔥🔥\n ", result[5]);
+
     let additionalQuestion = result?.[3].text; // actual data
 
     console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
@@ -221,3 +229,8 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     console.error("🔥return additional question error🔥", e);
   }
 };
+
+// VTS_TWO_EN: `What else can you find in the painting?`,
+// let additionalQuestion = "What else can you find in the painting?"; // similarity is 1.00
+// let additionalQuestion = "What can you find in the paintings?"; // similarity is 0.88
+// let additionalQuestion = "What can you find in the city?"; // similarity is 0.45
