@@ -2,7 +2,7 @@ import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
 import { getSimilarityWithVTS } from "~/lib/hugging-face";
 import {
-  getAdditionalQuestion,
+  getAdditionalQuestionPrompt,
   getAnswerWithVectorDBPrompt,
   getParaphrasePrompt,
   getRelatedQuestionPrompt,
@@ -15,6 +15,46 @@ interface Props {
   lang?: string;
   user?: string;
   id?: string;
+}
+
+interface IsAnsweredProps {
+  previousQuestion: string;
+  answer: string;
+}
+
+interface IsQuestionProps {
+  sentences: string;
+}
+
+/**
+ *
+ * @returns isAnswer:boolean, reason:string
+ */
+
+export async function getIsAnswered({ previousQuestion, answer }: IsAnsweredProps) {
+  try {
+    const chain = await chainInitializer({ type: CHAIN_INIT_TYPE.ANSWER, sentences: previousQuestion });
+    const [isAnswer, reason] = JSON.parse((await chain.call({ sentences: answer }))?.text);
+
+    return { isAnswer, reason };
+  } catch (e) {
+    console.error("🔥 isAnswered function error 🔥", e);
+  }
+}
+
+/**
+ *
+ * @returns isQuestion:boolean, rest : string[]
+ */
+
+export async function getIsQuestion({ sentences }: IsQuestionProps) {
+  try {
+    const chain = await chainInitializer({ type: CHAIN_INIT_TYPE.QUESTION, sentences });
+    const [isQuestion, ...rest] = JSON.parse((await chain.call({ sentences })).text);
+    return { isQuestion, rest };
+  } catch (e) {
+    console.error("🔥 getIsQuestion error 🔥");
+  }
 }
 
 /**
@@ -129,7 +169,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       context: JSON.stringify(context),
       quiz: true,
     });
-    const { prompt: additionalQuestionPrompt } = getAdditionalQuestion({ context });
+    const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ context });
 
     const result = await Promise.all([
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),

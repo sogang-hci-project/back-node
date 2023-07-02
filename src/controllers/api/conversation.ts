@@ -18,7 +18,6 @@ interface Props {
 const getSessionData = (req: Request): Props => {
   const sessionID = req.sessionID;
   const session = req.session as UserSession;
-  const lang = req.query.lang as string;
   return { sessionID, session };
 };
 
@@ -30,10 +29,19 @@ export const conversation = async (req: Request, res: Response, next: NextFuncti
     const { user } = req.body;
     const { sessionID, session } = getSessionData(req);
     const _user = lang === "ko" ? res.locals.translatedText : user;
-    const data: BaseConversationResponse = { contents: {}, currentStage: "", nextStage: "" };
+    const data: BaseConversationResponse = {
+      contents: {},
+      currentStage: "",
+      nextStage: "",
+    };
 
     if (id === "0") {
-      const { currentStage, nextStage, contents } = await conversationZero({ sessionID, session, lang, user: _user });
+      const { currentStage, nextStage, contents } = await conversationZero({
+        sessionID,
+        session,
+        lang,
+        user: _user,
+      });
       data.contents = contents;
       data.currentStage = currentStage;
       data.nextStage = nextStage;

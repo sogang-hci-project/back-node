@@ -5,6 +5,7 @@ interface Props {
   context?: string;
   quiz?: boolean;
   sentences?: string;
+  previousQuestion?: string;
 }
 
 // export const template_backup = `This is a visual thinking strategy sesion. Engage in conversation as Pablo Picasso and teacher. Speak once and wait for the next response.
@@ -56,7 +57,8 @@ interface Props {
 // Speak once and wait for the user to respond.
 // `;
 
-export const freeTalkTemplate = () => {
+// TODO : refine
+export const freeTalkTemplatePrompt = () => {
   const template = `Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
   The context records all the conversations so far. The data structure of the context looks like this 
   type chat = {{id:number, user:string, ai:string}}
@@ -81,9 +83,22 @@ export const freeTalkTemplate = () => {
   return { template };
 };
 
-// TODO : refind
-export const SeperateSentenceTemplate = ({ sentences }: Props) => {
-  const template = `seperate sentences below "---" 
+export const getIsQuestionPrompt = () => {
+  const template = `Check for interrogatives in the sentence below "---" and extract them if there are any. 
+  Give me an array of answers like this. [true , interrogative1, interrogative2,... ]
+  If it doesn't exist [false]
+  ---
+  {sentences}
+  `;
+  return { template };
+};
+
+export const getIsAnsweredPrompt = ({ previousQuestion }: Props) => {
+  const template = `
+  "previousQuestion:" is a previous question. Can you see if the previous question has been answered by looking at the sentence below '---'? 
+  If you think you know the answer to the question, answer true in javascript syntax not True, otherwise answer false in javascript syntax not False
+  [true or false, "reason why did you judge" in javascript string type] Give me an array of answers like this.
+  previousQeustion: ${previousQuestion} 
   ---
   {sentences}
   `;
@@ -161,7 +176,7 @@ export const getAnswerWithVectorDBPrompt = ({ context }: Props) => {
 };
 
 // TODO : refine
-export const getAdditionalQuestion = ({ context }: Props) => {
+export const getAdditionalQuestionPrompt = ({ context }: Props) => {
   const prompt = `
   See "Sentence 1 :" under "---".
   Sentence 1: is a record of all the conversations we've had, which we'll call context. 

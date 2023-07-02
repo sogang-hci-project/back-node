@@ -10,7 +10,6 @@ interface Props {
 const getSessionData = (req: Request): Props => {
   const sessionID = req.sessionID;
   const session = req.session as UserSession;
-
   return { sessionID, session };
 };
 
