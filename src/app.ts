@@ -24,9 +24,6 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json(`서버 연결 성공: ${req.protocol}, ${process.env.NODE_ENV || "develop"}`);
 });
 
-// app.use("/api/v1", apiGetRouter);
-// app.use("/api/v1", apiPostRouter);
-
 app.use("/api/v1", greetingRouter);
 app.use("/api/v1", conversationRouter);
 
@@ -39,7 +36,7 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
 app.listen(port, () => {
   console.log(`
       -----------------------------------
-              🎉DB 연결성공🎉
+              🎉App Start 🎉
               http://localhost:${port}
       -----------------------------------
     `);

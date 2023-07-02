@@ -10,12 +10,12 @@ export const maxAge = 1000 * 60 * 60 * 12; // 12h
 // const maxAge = 1000 * 30; // 30s
 
 export const isProd = process.env.NODE_ENV === "production";
-// export const corsOptions = {
-//   origin: true,
-//   // origin: "https://cookie-test-cyan.vercel.app",
-//   credentials: true,
-//   optionsSuccessStatus: 200,
-// };
+export const corsOptions = {
+  origin: true,
+  // origin: "https://cookie-test-cyan.vercel.app",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
 export const sessionOptions: any = {
   store: redisStore,

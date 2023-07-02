@@ -32,7 +32,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -73,7 +73,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -115,7 +115,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({ free: false });
+    const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({

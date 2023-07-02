@@ -1,7 +1,7 @@
-import { VTS } from "~/constants";
 import { redisClient, updateSessionData } from "~/lib";
 import { UserSession } from "~/types";
 import { returnAdditionalQuestion, returnVTS_three, returnVTS_two } from "./return-type";
+import { MESSAGE } from "~/datas";
 
 interface Props {
   sessionID?: string;
@@ -22,11 +22,11 @@ export const conversationZero = async ({ sessionID, session, lang, user }: Props
     // init context
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: `Thank you for agreeing. ${VTS.VTS_ONE_EN}` };
+    const chat = { id: context.length + 1, human: user, ai: `Thank you for agreeing. ${MESSAGE.VTS_ONE_EN}` };
     context.push(chat);
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
-    const contents = { agent: lang === "ko" ? VTS.VTS_ONE_KO : VTS.VTS_ONE_EN };
+    const contents = { agent: lang === "ko" ? MESSAGE.VTS_ONE_KO : MESSAGE.VTS_ONE_EN };
 
     return { contents, currentStage, nextStage };
   } catch (e) {

@@ -68,6 +68,10 @@ export const initTranslation = async (req: Request, res: Response, next: NextFun
   }
 };
 
+/**
+ * translate using DeepL API
+ */
+
 export const finalTranslation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const lang = req.query.lang as string;

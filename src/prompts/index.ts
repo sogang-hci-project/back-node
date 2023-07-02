@@ -1,5 +1,12 @@
 import { previousData } from "~/datas/previous";
 
+interface Props {
+  user?: string;
+  context?: string;
+  quiz?: boolean;
+  sentences?: string;
+}
+
 export const template_backup = `This is a visual thinking strategy sesion. Engage in conversation as Pablo Picasso and teacher. Speak once and wait for the next response.
 Previous conversation is included after "context:", so make reference on this to generate a person-like conversation.
 Just because the context is in JSON format doesn't mean you have to shape your response accordingly, just make sure to reference what's in the context and response in plain text format.
@@ -49,14 +56,8 @@ Do not repeat previous sentences.
 Speak once and wait for the user to respond.
 `;
 
-interface Props {
-  user?: string;
-  context?: string;
-  quiz?: boolean;
-}
-
 export const freeTalkTemplate = () => {
-  const prompt = `Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
+  const template = `Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
   The context records all the conversations so far. The data structure of the context looks like this 
   type chat = {{id:number, user:string, ai:string}}
   type context = chat[]
@@ -75,9 +76,18 @@ export const freeTalkTemplate = () => {
   - Answer me in English
   - Answer as a young Pablo Picasso.
   ---
-  {context}
+  {user}
   `;
-  return { prompt };
+  return { template };
+};
+
+// TODO : refind
+export const SeperateSentenceTemplate = ({ sentences }: Props) => {
+  const template = `seperate sentences below "---" 
+  ---
+  {sentences}
+  `;
+  return { template };
 };
 
 // TODO : refine

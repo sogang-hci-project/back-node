@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { VTS } from "~/constants";
 import { redisClient } from "~/lib/redis";
 import { UserSession } from "~/types";
 import { updateSessionData } from "~/lib";
+import { MESSAGE } from "~/datas";
 
 /**
  * create session
@@ -32,7 +32,7 @@ export const greeting_one = async (sessionID: string, session: UserSession, lang
     // init context
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
-    const chat = { id: context.length + 1, human: "", ai: VTS.GREETING_ONE_EN };
+    const chat = { id: context.length + 1, human: "", ai: MESSAGE.GREETING_ONE_EN };
     context.push(chat);
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
@@ -40,7 +40,7 @@ export const greeting_one = async (sessionID: string, session: UserSession, lang
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
-    const contents = { agent: lang === "ko" ? VTS.GREETING_ONE_KO : VTS.GREETING_ONE_EN };
+    const contents = { agent: lang === "ko" ? MESSAGE.GREETING_ONE_KO : MESSAGE.GREETING_ONE_EN };
 
     return { contents, currentStage, nextStage };
   } catch (e) {
@@ -55,7 +55,7 @@ export const greeting_two = async (sessionID: string, session: UserSession, lang
     // init context
     let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
     if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: VTS.GREETING_TWO_EN };
+    const chat = { id: context.length + 1, human: user, ai: MESSAGE.GREETING_TWO_EN };
     context.push(chat);
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
@@ -63,7 +63,7 @@ export const greeting_two = async (sessionID: string, session: UserSession, lang
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
-    const contents = { agent: lang === "ko" ? VTS.GREETING_TWO_KO : VTS.GREETING_TWO_EN };
+    const contents = { agent: lang === "ko" ? MESSAGE.GREETING_TWO_KO : MESSAGE.GREETING_TWO_EN };
 
     return { contents, currentStage, nextStage };
   } catch (e) {
