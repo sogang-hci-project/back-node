@@ -27,11 +27,7 @@ interface Props {
 export const returnVTS_two = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: `` };
-    context.push(chat);
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+    const { context } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
@@ -68,11 +64,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
 export const returnVTS_three = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: `` };
-    context.push(chat);
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+    const { context } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
@@ -110,11 +102,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
 export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
   try {
     // get context
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: `` };
-    context.push(chat);
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+    const { context } = await getContext({ sessionID, user });
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
@@ -174,5 +162,18 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     return { agent };
   } catch (e) {
     console.error("🔥return additional question error🔥", e);
+  }
+};
+
+const getContext = async ({ sessionID, user }: Props) => {
+  try {
+    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
+    if (!context) context = [];
+    const chat = { id: context.length + 1, human: user, ai: `` };
+    context.push(chat);
+    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+    return { context };
+  } catch (e) {
+    console.error("🔥 getContext function error 🔥", e);
   }
 };
