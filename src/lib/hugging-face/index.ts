@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { MESSAGE } from "~/datas";
-import { HUGGINGPACE_API_TOKEN, SIMILARITY_TYPE } from "~/constants";
+import { HUGGINGPACE_API_TOKEN } from "~/constants";
+import { SIMILARITY_TYPE } from "~/types";
 
 const API_TOKEN = HUGGINGPACE_API_TOKEN;
 

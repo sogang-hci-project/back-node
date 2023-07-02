@@ -6,6 +6,7 @@ import { PromptTemplate } from "langchain/prompts";
 import { OPENAI_API_KEY as openAIApiKey } from "~/constants";
 import loadVectorStore from "~/lib/langchain/load-local-db";
 import { SeperateSentenceTemplate, freeTalkTemplate } from "~/prompts";
+import { CHAIN_INIT_TYPE } from "~/types";
 
 export const llm = new ChatOpenAI({
   temperature: 0, // 0 is best for chat bot
@@ -22,7 +23,7 @@ export const llm = new ChatOpenAI({
 });
 
 interface Props {
-  type?: string;
+  type?: CHAIN_INIT_TYPE;
   sentences?: string;
 }
 
@@ -30,14 +31,14 @@ export async function chainInitializer({ type, sentences }: Props) {
   const vectorStore = await loadVectorStore();
   let chain;
 
-  if (type === "free") {
+  if (type === CHAIN_INIT_TYPE.FREE) {
     const { template } = freeTalkTemplate();
     const prompt = new PromptTemplate({
       template,
       inputVariables: ["user"],
     });
     chain = new LLMChain({ llm, prompt });
-  } else if (type === "seperate") {
+  } else if (type === CHAIN_INIT_TYPE.SEPARATE) {
     const { template } = SeperateSentenceTemplate({ sentences });
     const prompt = new PromptTemplate({
       template,

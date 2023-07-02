@@ -1,4 +1,3 @@
-import { SIMILARITY_TYPE } from "~/constants";
 import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
 import { getSimilarityWithVTS } from "~/lib/hugging-face";
@@ -8,7 +7,7 @@ import {
   getParaphrasePrompt,
   getRelatedQuestionPrompt,
 } from "~/prompts";
-import { UserSession } from "~/types";
+import { CHAIN_INIT_TYPE, SIMILARITY_TYPE, UserSession } from "~/types";
 
 interface Props {
   sessionID?: string;
@@ -17,6 +16,24 @@ interface Props {
   user?: string;
   id?: string;
 }
+
+/**
+ *
+ * @returns context, all records of previous conversation
+ */
+
+const getContext = async ({ sessionID, user }: Props) => {
+  try {
+    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
+    if (!context) context = [];
+    const chat = { id: context.length + 1, human: user, ai: `` };
+    context.push(chat);
+    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
+    return { context };
+  } catch (e) {
+    console.error("🔥 getContext function error 🔥", e);
+  }
+};
 
 /**
  * question 1 : paraphrase
@@ -67,7 +84,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     const { context } = await getContext({ sessionID, user });
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({});
+    const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -105,7 +122,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     const { context } = await getContext({ sessionID, user });
 
     // LLM init
-    const chainWithVectorDB = await chainInitializer({});
+    const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -162,18 +179,5 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     return { agent };
   } catch (e) {
     console.error("🔥return additional question error🔥", e);
-  }
-};
-
-const getContext = async ({ sessionID, user }: Props) => {
-  try {
-    let context = JSON.parse(await redisClient.get(`context:${sessionID}`));
-    if (!context) context = [];
-    const chat = { id: context.length + 1, human: user, ai: `` };
-    context.push(chat);
-    await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
-    return { context };
-  } catch (e) {
-    console.error("🔥 getContext function error 🔥", e);
   }
 };
