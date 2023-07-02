@@ -104,7 +104,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
  * question 1 : paraphrase
  * question 2 : related question
  * question 3 : actual answer for user's input
- * @return question 1,2,3
+ * @return question 1,2,3 + additional Question
  */
 
 export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
