@@ -1,5 +1,7 @@
+import { SIMILARITY_TYPE } from "~/constants";
 import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
+import { getSimilarityWithVTS } from "~/lib/hugging-face";
 import {
   getAdditionalQuestion,
   getAnswerWithVectorDBPrompt,
@@ -131,7 +133,39 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
     ]);
 
-    console.log("🔥🔥추가 질문 생성 확인🔥🔥", result[3].text);
+    // VTS_TWO_EN: `What else can you find in the painting?`,
+    // let additionalQuestion = "What else can you find in the painting?"; // similarity is 1.00
+    // let additionalQuestion = "What can you find in the paintings?"; // similarity is 0.88
+    // let additionalQuestion = "What can you find in the city?"; // similarity is 0.45
+    let additionalQuestion = result?.[3].text; // actual data
+
+    console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
+    console.log("\n");
+
+    let again = 0;
+    while (true) {
+      let sourceSentence;
+      if (!!again) {
+        sourceSentence = (await chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) })).text;
+        console.log(` 🔥🔥${again} 번째 유사도 검증 루프 시작 🔥🔥 \n `);
+      } else sourceSentence = additionalQuestion;
+      const [similarity] = await getSimilarityWithVTS({
+        type: SIMILARITY_TYPE.WITH_VTS_TWO,
+        sourceSentence,
+      });
+      console.log("🔥🔥 similarity 🔥🔥\n", similarity);
+      console.log("\n");
+      if (similarity > 0.9 && !again) {
+        again += 1;
+        continue;
+      } else {
+        additionalQuestion = sourceSentence;
+        break;
+      }
+    }
+
+    console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
+    console.log("\n");
 
     const agent = `${result[0].text}${result[1].text}${result[2].text}${result[3].text}`;
     context[context.length - 1].ai = agent;
