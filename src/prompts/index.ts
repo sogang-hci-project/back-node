@@ -1,4 +1,4 @@
-import { previousData } from "~/static/previous";
+import { previousData } from "~/datas/previous";
 
 export const template_backup = `This is a visual thinking strategy sesion. Engage in conversation as Pablo Picasso and teacher. Speak once and wait for the next response.
 Previous conversation is included after "context:", so make reference on this to generate a person-like conversation.
