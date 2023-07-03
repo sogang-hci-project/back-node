@@ -126,7 +126,6 @@ export const getRelatedQuestionPrompt = ({ user }: Props) => {
   return { prompt };
 };
 
-// TODO : refine
 export const getParaphrasePrompt = ({ user }: Props) => {
   const prompt = `React by referring back to sentence 1. For example, if sentence 1 says "Because they don't have, like, a very good house really. I think they're in that house. 
     They don't have very good clothes either. Like their clothes are all wrecked up and ripped and the children's clothes are really dirty", you can say " Okay, so you have several pieces of evidence that suggest they're poor to you. You're looking behind them, thinking they might live in a very plain house. 

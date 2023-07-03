@@ -78,7 +78,6 @@ export const conversationThree = async ({ sessionID, session, user }: Props) => 
 
     const { agent } = await returnVTS_two({ sessionID, user });
     const contents = { agent };
-
     return { contents, currentStage, nextStage };
   } catch (e) {
     console.error("🔥 conversation three service error 🔥", e);
