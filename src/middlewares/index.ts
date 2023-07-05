@@ -20,6 +20,10 @@ export const isSessionInit = async (req: Request, res: Response, next: NextFunct
  */
 
 export const addSession = async (req: Request, res: Response, next: NextFunction) => {
+  if (req.url === "/greeting/0") {
+    next();
+    return;
+  }
   try {
     const sessionID = req.query.sessionID as string;
     if (!sessionID)
@@ -41,13 +45,14 @@ export const addSession = async (req: Request, res: Response, next: NextFunction
  * translate using DeepL API
  */
 
-export const translation = async (req: Request, res: Response, next: NextFunction) => {
+export const initTranslation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const lang = req.query.lang as string;
     const user = req.body.user;
     const typeOfLang = ["en", "ko"];
-    if (!lang || !typeOfLang.includes(lang)) return res.status(400).json({ message: "need lang query string" });
-    if (!user) return res.status(400).json({ message: "incorrect data" });
+    if ((!lang || !typeOfLang.includes(lang)) && req.url !== "/greeting/0")
+      return res.status(400).json({ message: "need lang query string" });
+    if (req.url !== "/greeting/0" && !user) return res.status(400).json({ message: "incorrect data" });
 
     if (lang === "ko") {
       res.locals.translatedText = await deeplTranslate(user, lang);
@@ -58,6 +63,30 @@ export const translation = async (req: Request, res: Response, next: NextFunctio
       next();
     }
   } catch (e) {
+    console.error("🔥 init translation error🔥", e);
+    next(e);
+  }
+};
+
+/**
+ * translate using DeepL API
+ */
+
+export const finalTranslation = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const lang = req.query.lang as string;
+    const { data } = res.locals.finalTranslation;
+    if (!data) return res.status(400).json({ message: "need data for final translating " });
+
+    if (lang === "ko") {
+      const { agent } = data.contents;
+      const result = await deeplTranslate(agent, "en");
+      data.contents.agent = result;
+      console.log("미들웨어 : 한글 -> 영어 ");
+    }
+    return res.status(200).json({ message: "success", data });
+  } catch (e) {
+    console.error("🔥final translation error🔥", e);
     next(e);
   }
 };

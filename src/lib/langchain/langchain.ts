@@ -3,14 +3,16 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { LLMChain } from "langchain/chains";
 import { PromptTemplate } from "langchain/prompts";
 
-import { OPENAI_API_KEY as openAIApiKey, template } from "~/constants";
+import { OPENAI_API_KEY as openAIApiKey } from "~/constants";
 import loadVectorStore from "~/lib/langchain/load-local-db";
+import { getIsQuestionPrompt, getIsAnsweredPrompt, freeTalkTemplatePrompt } from "~/prompts";
+import { CHAIN_INIT_TYPE } from "~/types";
 
-export const model = new ChatOpenAI({
-  temperature: 0.7,
+export const llm = new ChatOpenAI({
+  temperature: 0, // 0 is best for chat bot
   openAIApiKey,
-  verbose: true,
-  streaming: true,
+  verbose: false,
+  streaming: false,
   callbacks: [
     {
       handleLLMNewToken(token: string) {
@@ -20,17 +22,39 @@ export const model = new ChatOpenAI({
   ],
 });
 
-export async function chainInitializer({ free }: { free: boolean }) {
+interface Props {
+  type?: CHAIN_INIT_TYPE;
+  sentences?: string;
+}
+
+export async function chainInitializer({ type, sentences }: Props) {
   const vectorStore = await loadVectorStore();
   let chain;
-  if (free) {
+
+  if (type === CHAIN_INIT_TYPE.FREE) {
+    const { template } = freeTalkTemplatePrompt();
     const prompt = new PromptTemplate({
-      template: template,
+      template,
       inputVariables: ["user"],
     });
-    chain = new LLMChain({ llm: model, prompt: prompt });
+    chain = new LLMChain({ llm, prompt });
+  } else if (type === CHAIN_INIT_TYPE.QUESTION) {
+    const { template } = getIsQuestionPrompt();
+    const prompt = new PromptTemplate({
+      template,
+      inputVariables: ["sentences"],
+    });
+    chain = new LLMChain({ llm, prompt });
+  } else if (type === CHAIN_INIT_TYPE.ANSWER) {
+    const { template } = getIsAnsweredPrompt({ previousQuestion: sentences });
+    const prompt = new PromptTemplate({
+      template,
+      inputVariables: ["sentences"],
+    });
+    chain = new LLMChain({ llm, prompt });
   } else {
-    chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
+    // using Vector Store
+    chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
   }
   return chain;
 }

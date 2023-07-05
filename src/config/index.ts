@@ -16,6 +16,7 @@ export const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
+
 export const sessionOptions: any = {
   store: redisStore,
   genid: function () {
