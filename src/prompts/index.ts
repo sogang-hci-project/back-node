@@ -105,8 +105,7 @@ export const getIsAnsweredPrompt = ({ previousQuestion }: Props) => {
   return { template };
 };
 
-// TODO : refine
-export const getRelatedQuestionPrompt = ({ user }: Props) => {
+export const getRelatedQuestionPrompt_backup = ({ user }: Props) => {
   const prompt = `sentence 1 is the previous answer. sentence 2 is the current answer. 
   find if anything in sentence 2 is mentioned in sentence 1. 
   Answer along the lines of "I previously gave an answer like sentence1, and you mentioned sentence2".  below "---".
@@ -126,11 +125,43 @@ export const getRelatedQuestionPrompt = ({ user }: Props) => {
   return { prompt };
 };
 
+export const getRelatedQuestionPrompt = ({ user }: Props) => {
+  const prompt = `This is an experiment. "context:" are the results from the previous experiment. 
+  "user:" can you check if there are any values similar to context? 
+  I'll give you an example.  
+  If "context: ["I like flower", "I like dog", "I like food"]", "user: "I like pet", 
+  then the similarity to the current user's answer is I like dog, because I like dog before. 
+  "context:" and "user:" are located below the "---".
+  
+  Let's talk about the data type of "context:".
+  It's [{id:number, user:string, ai:string}, ... ] and 
+  it's the user:string part where you should look for similar questions.
+
+  Adhere to the options below.
+  If similar answers exist, 
+  give an array of the form [true, similar answer1, similar answer2, ...] for any number of them. 
+  If no similar answers exist, give [false, "nothing"].
+
+    - Tone: Polite
+    - Style: Concise (100 characters or less)
+    - Reader level: College students
+    - Length: One sentence
+    - Answer me in English
+    - Don't ask me any more questions.
+    - If you don't have anything relevant, don't answer.
+    ---
+    context:${previousData} \n
+    user:${user}
+    `;
+  return { prompt };
+};
+
 export const getParaphrasePrompt = ({ user }: Props) => {
-  const prompt = `React by referring back to sentence 1. For example, if sentence 1 says "Because they don't have, like, a very good house really. I think they're in that house. 
-    They don't have very good clothes either. Like their clothes are all wrecked up and ripped and the children's clothes are really dirty", you can say " Okay, so you have several pieces of evidence that suggest they're poor to you. You're looking behind them, thinking they might live in a very plain house. 
-    And you're looking at their clothing and noticed that it's torn and soiled. All right, what more can we find?". Rephrase sentence 1 using different words, as appropriate. below "---".
-    Adhere to the options below. 
+  const prompt = `The way to empathize with someone in a conversation is to repeat their words back to them and give them a short response, 
+  like "I'm not feeling well", "Really? You're not feeling well, get some rest", 
+  etc. answer "user:" under "---" in 50 characters or less in an empathetic way.
+  If you don't have enough information to provide an empathetic response in this context., 
+  don't say anything else and give an empty string "I didn't quite understand" as the answer.
     
     - Tone: Polite
     - Style: Concise (100 characters or less)
@@ -139,13 +170,13 @@ export const getParaphrasePrompt = ({ user }: Props) => {
     - Answer me in English
     - Don't ask me any more questions.
     ---
-    Sentence 1 :${user} \n
+    user:${user} \n
     `;
   return { prompt };
 };
 
 // TODO : refine
-export const getAnswerWithVectorDBPrompt = ({ context }: Props) => {
+export const getAnswerWithVectorDBPrompt_backup = ({ context }: Props) => {
   const prompt = `
     See "Sentence 1 :" under "---".
     Sentence 1: is a record of all the conversations we've had, which we'll call context. 
@@ -171,6 +202,20 @@ export const getAnswerWithVectorDBPrompt = ({ context }: Props) => {
     ---
     Sentence 1 : ${context} \n
     `;
+  return { prompt };
+};
+
+export const getAnswerWithVectorDBPrompt = ({ user }: Props) => {
+  const prompt = `
+  We're in a museum looking at Pablo Picasso's painting Guernica, 
+  and you're the young Picasso. For a natural conversation, 
+  speak once and wait for the next answer.
+  Answer "user:" sentence under "---" 
+
+
+  ---
+  user:${user}
+  `;
   return { prompt };
 };
 

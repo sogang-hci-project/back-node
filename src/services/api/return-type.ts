@@ -1,3 +1,4 @@
+import { ChainValues } from "langchain/dist/schema";
 import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
 import { getSimilarityWithVTS } from "~/lib/hugging-face";
@@ -25,6 +26,49 @@ interface IsAnsweredProps {
 interface IsQuestionProps {
   sentences: string;
 }
+
+const example = [
+  { isQuestion: false, rest: [""] }, // if isQuestion === true , rest : [sentence1, sentence2, ... ]
+  {
+    isAnswer: false,
+    reason: "The sentence below '---' does not provide any information about the previous question.",
+  },
+  { text: "I didn't quite understand." },
+  { text: '[false, "nothing"]' },
+  { text: "---" },
+];
+
+type typeOfResult = typeof example;
+
+export const getAgentFullSentence = (result: typeOfResult) => {
+  let agent = "";
+  const isQuestion = result?.[0];
+  const isAnswer = result?.[1];
+  // TODO : regenerate answer for final experiment?
+  if (isQuestion) {
+  }
+
+  // TODO : ask again for final experiment?
+  if (!isAnswer) {
+  }
+
+  const paraphrased = result?.[2]?.text === `I didn't quite understand.` ? "" : result?.[2]?.text;
+  const relatedQuestion =
+    result?.[3]?.text && !!JSON.parse(result?.[3]?.text)[0] ? JSON.parse(result?.[3]?.text)[1] : "";
+  const regex = /Picasso:\s(.+)/;
+  const answer = result?.[4]?.text?.match(regex)?.[1];
+
+  agent += paraphrased;
+  agent += !!relatedQuestion && `Someone had a similar answer before.`;
+  agent += answer;
+
+  console.log("paraphrased :", paraphrased);
+  console.log("relatedQuestion :", relatedQuestion);
+  console.log("answer", answer);
+  console.log("최종 결과", agent);
+
+  return { agent };
+};
 
 /**
  *
@@ -93,18 +137,18 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
-      context: JSON.stringify(context),
+      user,
     });
 
     const result = await Promise.all([
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
-      getIsQuestion({ sentences: user }),
-      getIsAnswered({ previousQuestion, answer }),
     ]);
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_TWO_EN}`;
+    const { agent } = getAgentFullSentence(result as any);
 
     // update context
     context[context.length - 1].ai = agent;
@@ -132,18 +176,18 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
-      context: JSON.stringify(context),
+      user,
     });
 
     const result = await Promise.all([
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
-      getIsQuestion({ sentences: user }),
-      getIsAnswered({ previousQuestion, answer }),
     ]);
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${MESSAGE.VTS_THREE_EN}`;
+    const { agent } = getAgentFullSentence(result as any);
 
     // update context
     context[context.length - 1].ai = agent;
@@ -172,25 +216,24 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
-      context: JSON.stringify(context),
-      quiz: true,
+      user,
     });
     const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ context });
 
     const result = await Promise.all([
+      getIsQuestion({ sentences: user }),
+      getIsAnswered({ previousQuestion, answer }),
       chainWithVectorDB.call({ query: JSON.stringify(paraphrasePrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(relatedQuestionPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
-      getIsQuestion({ sentences: user }),
-      getIsAnswered({ previousQuestion, answer }),
     ]);
 
     // TODO : Add logic
     //console.log("🔥🔥 질문이 있는지 확인 🔥🔥 \n", result[4]);
     //console.log("🔥🔥 답변을 했는지 확인 🔥🔥\n ", result[5]);
 
-    let additionalQuestion = result?.[3].text; // actual data
+    let additionalQuestion = result?.[5].text; // actual data
 
     console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     console.log("\n");
@@ -220,7 +263,9 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     console.log("\n");
 
-    const agent = `${result[0].text}${result[1].text}${result[2].text}${result[3].text}`;
+    const { agent } = getAgentFullSentence(result as any);
+    console.log("최종 답", agent);
+    console.log("유사 질문", additionalQuestion);
     context[context.length - 1].ai = agent;
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
