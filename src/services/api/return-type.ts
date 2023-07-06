@@ -8,6 +8,7 @@ import {
   getRelatedQuestionPrompt,
 } from "~/prompts";
 import { CHAIN_INIT_TYPE, SIMILARITY_TYPE, UserSession } from "~/types";
+import message from "~/datas/message";
 
 interface Props {
   sessionID?: string;
