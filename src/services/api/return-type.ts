@@ -8,7 +8,6 @@ import {
   getRelatedQuestionPrompt,
 } from "~/prompts";
 import { CHAIN_INIT_TYPE, SIMILARITY_TYPE, UserSession } from "~/types";
-import message from "~/datas/message";
 
 interface Props {
   sessionID?: string;
@@ -59,10 +58,16 @@ export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFu
   }
 
   const paraphrased = result?.[2]?.text === `I didn't quite understand.` ? "" : result?.[2]?.text;
-  const relatedQuestion =
-    result?.[3]?.text && !!JSON.parse(result?.[3]?.text)[0] ? JSON.parse(result?.[3]?.text)[1] : "";
-  const regex = /Picasso:\s(.+)/;
-  const answer = result?.[4]?.text?.match(regex)?.[1];
+
+  // 이부분이 내가 원래 해뒀던 방식이랑 출력 값이 달라지면서 생긴 에러인데, 우선 주석 처리해서 넘어가고 배포한 담에 프론트랑 연결하고 TODO 찍고 넘어가자.
+  // 이제 수정하더라도 이 함수만 수정하면 모든 라우터에 다 적용돼서 별로 안 어려울듯.
+  // TODO : refine output structure
+  // const relatedQuestion =
+  //   result?.[3]?.text && !!JSON.parse(result?.[3]?.text)[0] ? JSON.parse(result?.[3]?.text)[1] : "";
+  // const regex = /Picasso:\s(.+)/;
+  // const answer = result?.[4]?.text?.match(regex)?.[1];
+  const relatedQuestion = result?.[3]?.text;
+  const answer = result?.[4].text;
 
   agent += paraphrased;
   agent += !!relatedQuestion && `Someone had a similar answer before.`;

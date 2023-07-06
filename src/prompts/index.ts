@@ -138,6 +138,8 @@ export const getRelatedQuestionPrompt = ({ user }: Props) => {
     })
     .join("");
 
+  console.log("contextualizedData🔥🔥", contextualizedData);
+
   // const prompt = `This is an experiment. "context:" are the results from the previous experiment.
   // "user:" can you check if there are any values similar to context?
   // I'll give you an example.
@@ -277,6 +279,8 @@ export const getAdditionalQuestionPrompt = ({ context }: Props) => {
       return `Pablo Picasso: ${item.ai}, Student: ${item.human} \n`;
     })
     .join("");
+
+  console.log("textContext🔥🔥🔥", textContext);
 
   const prompt = `
     [TASK]
