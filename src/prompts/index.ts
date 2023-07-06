@@ -1,8 +1,14 @@
 import { previousData } from "~/datas/previous";
 
+interface DialogueItem {
+  id: number;
+  human: string;
+  ai: string;
+}
+
 interface Props {
   user?: string;
-  context?: string;
+  context?: DialogueItem[];
   quiz?: boolean;
   sentences?: string;
   previousQuestion?: string;
@@ -126,52 +132,83 @@ export const getRelatedQuestionPrompt_backup = ({ user }: Props) => {
 };
 
 export const getRelatedQuestionPrompt = ({ user }: Props) => {
-  const prompt = `This is an experiment. "context:" are the results from the previous experiment. 
-  "user:" can you check if there are any values similar to context? 
-  I'll give you an example.  
-  If "context: ["I like flower", "I like dog", "I like food"]", "user: "I like pet", 
-  then the similarity to the current user's answer is I like dog, because I like dog before. 
-  "context:" and "user:" are located below the "---".
-  
-  Let's talk about the data type of "context:".
-  It's [{id:number, user:string, ai:string}, ... ] and 
-  it's the user:string part where you should look for similar questions.
+  const contextualizedData = previousData
+    .map((data) => {
+      return `Pablo Picasso: ${data.ai}, Student: ${data.user} \n`;
+    })
+    .join("");
 
-  Adhere to the options below.
-  If similar answers exist, 
-  give an array of the form [true, similar answer1, similar answer2, ...] for any number of them. 
-  If no similar answers exist, give [false, "nothing"].
+  console.log("contextualizedData🔥🔥", contextualizedData);
 
-    - Tone: Polite
-    - Style: Concise (100 characters or less)
-    - Reader level: College students
-    - Length: One sentence
-    - Answer me in English
-    - Don't ask me any more questions.
-    - If you don't have anything relevant, don't answer.
-    ---
-    context:${previousData} \n
-    user:${user}
-    `;
+  // const prompt = `This is an experiment. "context:" are the results from the previous experiment.
+  // "user:" can you check if there are any values similar to context?
+  // I'll give you an example.
+  // If "context: ["I like flower", "I like dog", "I like food"]", "user: "I like pet",
+  // then the similarity to the current user's answer is I like dog, because I like dog before.
+  // "context:" and "user:" are located below the "---".
+
+  // Let's talk about the data type of "context:".
+  // It's [{id:number, user:string, ai:string}, ... ] and
+  // it's the user:string part where you should look for similar questions.
+
+  // Adhere to the options below.
+  // If similar answers exist,
+  // give an array of the form [true, similar answer1, similar answer2, ...] for any number of them.
+  // If no similar answers exist, give [false, "nothing"].
+
+  //   - Tone: Polite
+  //   - Style: Concise (100 characters or less)
+  //   - Reader level: College students
+  //   - Length: One sentence
+  //   - Answer me in English
+  //   - Don't ask me any more questions.
+  //   - If you don't have anything relevant, don't answer.
+  //   ---
+  //   context:${previousData} \n
+  //   user:${user}
+  //   `;
+
+  const prompt = `
+  [GOAL]
+  You're the Pablo Picasso who in midst of the conversation.
+  From following dialogue, generate a reply linking similar ideas to current answer of the student.
+  Generate a plain text without any format.
+
+  [DIALOGUE]
+  ${contextualizedData}
+
+  [CONVERSATION]
+  Student: ${user}
+  `;
   return { prompt };
 };
 
 export const getParaphrasePrompt = ({ user }: Props) => {
-  const prompt = `The way to empathize with someone in a conversation is to repeat their words back to them and give them a short response, 
-  like "I'm not feeling well", "Really? You're not feeling well, get some rest", 
-  etc. answer "user:" under "---" in 50 characters or less in an empathetic way.
-  If you don't have enough information to provide an empathetic response in this context., 
-  don't say anything else and give an empty string "I didn't quite understand" as the answer.
+  // const prompt = `The way to empathize with someone in a conversation is to repeat their words back to them and give them a short response,
+  // like "I'm not feeling well", "Really? You're not feeling well, get some rest",
+  // etc. answer "user:" under "---" in 50 characters or less in an empathetic way.
+  // If you don't have enough information to provide an empathetic response in this context.,
+  // don't say anything else and give an empty string "I didn't quite understand" as the answer.
+
+  //   - Tone: Polite
+  //   - Style: Concise (100 characters or less)
+  //   - Reader level: College students
+  //   - Length: One sentence
+  //   - Answer me in English
+  //   - Don't ask me any more questions.
+  //   ---
+  //   user:${user} \n
+  //   `;
+  const prompt = `
+    [TASK]
+    Assume that you're the Pablo Picasso who's instructing the student about your painting.
+    Generate a reply to following observation, yet only using a paraphrase with verbose expressions.
+    The idea is to convey that you're empathizing with student's observation. Do not exceed more than one sentence.
     
-    - Tone: Polite
-    - Style: Concise (100 characters or less)
-    - Reader level: College students
-    - Length: One sentence
-    - Answer me in English
-    - Don't ask me any more questions.
-    ---
-    user:${user} \n
-    `;
+    [DATA]
+    Observation: ${user}
+  `;
+
   return { prompt };
 };
 
@@ -221,21 +258,39 @@ export const getAnswerWithVectorDBPrompt = ({ user }: Props) => {
 
 // TODO : refine
 export const getAdditionalQuestionPrompt = ({ context }: Props) => {
-  const prompt = `
-  See "Sentence 1 :" under "---".
-  Sentence 1: is a record of all the conversations we've had, which we'll call context. 
-  Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
-  The context records all the conversations so far. The data structure of the context looks like this.
-  type chat = {{id:number, user:string, ai:string}}
-  type context = chat[]
-  chat.id is the primaryKey, chat.user is the user's chat, and chat.ai is Pablo Picasso, your chat.
-  The answer is generated by referencing the last chat in context.
-  
-  Give a response to user's last words in the form of some sort of quiz or question. 
-  For example, if context[context.length-1].user said "I'm hungry", what kind of food would you like to eat? or a quiz in the form of "What did you say is my favorite food?".
+  // const prompt = `
+  // See "Sentence 1 :" under "---".
+  // Sentence 1: is a record of all the conversations we've had, which we'll call context.
+  // Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
+  // The context records all the conversations so far. The data structure of the context looks like this.
+  // type chat = {{id:number, user:string, ai:string}}
+  // type context = chat[]
+  // chat.id is the primaryKey, chat.user is the user's chat, and chat.ai is Pablo Picasso, your chat.
+  // The answer is generated by referencing the last chat in context.
 
-  ---
-  context:${context}
+  // Give a response to user's last words in the form of some sort of quiz or question.
+  // For example, if context[context.length-1].user said "I'm hungry", what kind of food would you like to eat? or a quiz in the form of "What did you say is my favorite food?".
+
+  // ---
+  // context:${context}
+  // `;
+  const textContext = context
+    .map((item) => {
+      return `Pablo Picasso: ${item.ai}, Student: ${item.human} \n`;
+    })
+    .join("");
+
+  console.log("textContext🔥🔥🔥", textContext);
+
+  const prompt = `
+    [TASK]
+    You're an Pablo Picasso working as an art teacher, who is currently advising the student about your painting Guernica.
+    Given following [DIALOGUE], generate a question that can clarify students idea about the painting.
+    The idea is to help student generate one's own understanding of the painting. Do not exceed more than one sentence.
+    
+    [DIALOGUE]
+    ${textContext}
   `;
+
   return { prompt };
 };

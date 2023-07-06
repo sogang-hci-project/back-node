@@ -1,4 +1,3 @@
-import { ChainValues } from "langchain/dist/schema";
 import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
 import { getSimilarityWithVTS } from "~/lib/hugging-face";
@@ -40,7 +39,13 @@ const example = [
 
 type typeOfResult = typeof example;
 
-export const getAgentFullSentence = (result: typeOfResult) => {
+interface getAgentFullSentenceProps {
+  result: typeOfResult;
+  secondVTS?: boolean;
+  thirdVTS?: boolean;
+}
+
+export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFullSentenceProps) => {
   let agent = "";
   const isQuestion = result?.[0];
   const isAnswer = result?.[1];
@@ -53,18 +58,29 @@ export const getAgentFullSentence = (result: typeOfResult) => {
   }
 
   const paraphrased = result?.[2]?.text === `I didn't quite understand.` ? "" : result?.[2]?.text;
-  const relatedQuestion =
-    result?.[3]?.text && !!JSON.parse(result?.[3]?.text)[0] ? JSON.parse(result?.[3]?.text)[1] : "";
-  const regex = /Picasso:\s(.+)/;
-  const answer = result?.[4]?.text?.match(regex)?.[1];
+
+  // 이부분이 내가 원래 해뒀던 방식이랑 출력 값이 달라지면서 생긴 에러인데, 우선 주석 처리해서 넘어가고 배포한 담에 프론트랑 연결하고 TODO 찍고 넘어가자.
+  // 이제 수정하더라도 이 함수만 수정하면 모든 라우터에 다 적용돼서 별로 안 어려울듯.
+  // TODO : refine output structure
+  // const relatedQuestion =
+  //   result?.[3]?.text && !!JSON.parse(result?.[3]?.text)[0] ? JSON.parse(result?.[3]?.text)[1] : "";
+  // const regex = /Picasso:\s(.+)/;
+  // const answer = result?.[4]?.text?.match(regex)?.[1];
+  const relatedQuestion = result?.[3]?.text;
+  const answer = result?.[4].text;
 
   agent += paraphrased;
   agent += !!relatedQuestion && `Someone had a similar answer before.`;
   agent += answer;
 
+  console.log("result : ", result);
   console.log("paraphrased :", paraphrased);
   console.log("relatedQuestion :", relatedQuestion);
   console.log("answer", answer);
+
+  if (secondVTS) agent += MESSAGE.VTS_TWO_EN;
+  if (thirdVTS) agent += MESSAGE.VTS_THREE_EN;
+
   console.log("최종 결과", agent);
 
   return { agent };
@@ -148,7 +164,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -187,7 +203,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -263,7 +279,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     console.log("\n");
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
     console.log("최종 답", agent);
     console.log("유사 질문", additionalQuestion);
     context[context.length - 1].ai = agent;
