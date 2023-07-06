@@ -245,6 +245,8 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
     ]);
 
+    console.log("여기까지 확인1", result);
+
     // TODO : Add logic
     //console.log("🔥🔥 질문이 있는지 확인 🔥🔥 \n", result[4]);
     //console.log("🔥🔥 답변을 했는지 확인 🔥🔥\n ", result[5]);
@@ -275,6 +277,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
         break;
       }
     }
+    console.log("여기까지 확인2", result);
 
     console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     console.log("\n");
