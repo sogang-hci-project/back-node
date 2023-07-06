@@ -1,4 +1,4 @@
-export const previousData = JSON.stringify([
+export const previousData = [
   {
     id: 0,
     ai: "What do you see in the picture?",
@@ -34,4 +34,4 @@ export const previousData = JSON.stringify([
     ai: "What do you see in the picture?",
     user: "I don't know",
   },
-]);
+];

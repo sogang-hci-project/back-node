@@ -1,4 +1,3 @@
-import { ChainValues } from "langchain/dist/schema";
 import { MESSAGE } from "~/datas";
 import { chainInitializer, redisClient } from "~/lib";
 import { getSimilarityWithVTS } from "~/lib/hugging-face";
@@ -9,6 +8,7 @@ import {
   getRelatedQuestionPrompt,
 } from "~/prompts";
 import { CHAIN_INIT_TYPE, SIMILARITY_TYPE, UserSession } from "~/types";
+import message from "~/datas/message";
 
 interface Props {
   sessionID?: string;
@@ -40,7 +40,13 @@ const example = [
 
 type typeOfResult = typeof example;
 
-export const getAgentFullSentence = (result: typeOfResult) => {
+interface getAgentFullSentenceProps {
+  result: typeOfResult;
+  secondVTS?: boolean;
+  thirdVTS?: boolean;
+}
+
+export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFullSentenceProps) => {
   let agent = "";
   const isQuestion = result?.[0];
   const isAnswer = result?.[1];
@@ -62,9 +68,14 @@ export const getAgentFullSentence = (result: typeOfResult) => {
   agent += !!relatedQuestion && `Someone had a similar answer before.`;
   agent += answer;
 
+  console.log("result : ", result);
   console.log("paraphrased :", paraphrased);
   console.log("relatedQuestion :", relatedQuestion);
   console.log("answer", answer);
+
+  if (secondVTS) agent += MESSAGE.VTS_TWO_EN;
+  if (thirdVTS) agent += MESSAGE.VTS_THREE_EN;
+
   console.log("최종 결과", agent);
 
   return { agent };
@@ -148,7 +159,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -187,7 +198,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -263,7 +274,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     console.log("\n");
 
-    const { agent } = getAgentFullSentence(result as any);
+    const { agent } = getAgentFullSentence({ result: result as any });
     console.log("최종 답", agent);
     console.log("유사 질문", additionalQuestion);
     context[context.length - 1].ai = agent;
