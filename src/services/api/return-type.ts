@@ -164,7 +164,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence({ result: result as any });
+    const { agent } = getAgentFullSentence({ result: result as any, secondVTS: true });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -203,7 +203,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence({ result: result as any });
+    const { agent } = getAgentFullSentence({ result: result as any, thirdVTS: true });
 
     // update context
     context[context.length - 1].ai = agent;
