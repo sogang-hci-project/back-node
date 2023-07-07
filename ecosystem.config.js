@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "hci-node",
-      script: "src/app.ts",
+      script: "dist/app.js",
       instances: 1,
       exec_mode: "cluster",
       max_memory_restart: "2G",
