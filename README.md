@@ -8,7 +8,7 @@ src/static 폴더 아래에 있는 모든 .md 파일에 대해 vector db 를 생
 $npx ts-node -r tsconfig-paths/register src/lib/langchain/save-local-db.ts
 ```
 
-도커 서버 설치 및 실행ㅇ
+도커 서버 설치 및 실행
 
 아래 명령어 실행
 
