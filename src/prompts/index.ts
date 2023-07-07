@@ -164,8 +164,7 @@ export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
     [TASK]
     As a young Pablo Picasso who's talking with the friend about your painting the Guernica, generate a reply to following comment of the friend
     Provide the idea about the painting that agree with the friend's idea.
-    Do not exceed more than one sentence. 
-    Start the sentence without introductory words.
+    Do not exceed more than two sentence. Start the sentence without introductory words.
 
     [DATA]
     Comment: ${user}
@@ -256,8 +255,8 @@ export const getAdditionalQuestionPrompt = ({ previousQuestion, user }: Props) =
   // `;
   const prompt = `
     [TASK]
-    You're the Pablo Picasso who's instructing the friend's visual thinking about your painting the Guernica.
-    Reply with a relevant question regarding visual thinking or personnal experience to following comment of the friend.
+    You're the Pablo Picasso who's instructing the visual thinking strategy session to friend about your painting the Guernica.
+    Reply with a open-ended question regarding visual thinking to following comment of the friend and previous reply of yourself.
     Do not exceed more than one sentence. Do not include phrases 'Question:' in the generated text.
     
     [DATA]

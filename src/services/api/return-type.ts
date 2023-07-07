@@ -45,7 +45,7 @@ interface getAgentFullSentenceProps {
   thirdVTS?: boolean;
 }
 
-export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFullSentenceProps) => {
+export const getAgentFullSentence = async ({ result, secondVTS, thirdVTS }: getAgentFullSentenceProps) => {
   let agent = "";
   // 응답이 잘못 생성되는 경우를 고려하여 default value 지정
   const isQuestion = (() => {
@@ -90,8 +90,19 @@ export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFu
   isQuestion && console.log("■■■■■■■■■[QUESTION ANSWER RESULT]■■■■■■■■■\n", answer);
   addiontionalQuestion && console.log("■■■■■■■■■[ADDITIONAL QUESTION RESULT]■■■■■■■■■\n", addiontionalQuestion);
 
-  if (secondVTS) agent += MESSAGE.VTS_TWO_EN;
-  if (thirdVTS) agent += MESSAGE.VTS_THREE_EN;
+  const chainWithVectorDB = await chainInitializer({});
+  agent = (
+    await chainWithVectorDB.call({
+      query: `
+      Refine following message to add congruency between sentences. Fix the minimum amount.
+
+      ${agent}
+  `,
+    })
+  ).text;
+
+  if (secondVTS) agent = agent + " " + MESSAGE.VTS_TWO_EN;
+  if (thirdVTS) agent = agent + " " + MESSAGE.VTS_THREE_EN;
 
   console.log("■■■■■■■■■[FINAL RESULT]■■■■■■■■■\n", agent);
 
@@ -162,8 +173,8 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
-    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
+    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user, previousQuestion });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
@@ -176,7 +187,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence({ result: result as any, secondVTS: true });
+    const { agent } = await getAgentFullSentence({ result: result as any, secondVTS: true });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -201,8 +212,8 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
-    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
+    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user, previousQuestion });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
@@ -215,7 +226,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
     ]);
 
-    const { agent } = getAgentFullSentence({ result: result as any, thirdVTS: true });
+    const { agent } = await getAgentFullSentence({ result: result as any, thirdVTS: true });
 
     // update context
     context[context.length - 1].ai = agent;
@@ -241,12 +252,12 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
 
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
-    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
+    const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user, previousQuestion });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
-    const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ previousQuestion, user });
+    const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ user, previousQuestion });
 
     const result = await Promise.all([
       getIsQuestion({ sentences: user }),
@@ -295,7 +306,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     // console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
     // console.log("\n");
 
-    const { agent } = getAgentFullSentence({ result: result as any });
+    const { agent } = await getAgentFullSentence({ result: result as any });
     // console.log("최종 답", agent);
     // console.log("유사 질문", additionalQuestion);
     context[context.length - 1].ai = agent;
