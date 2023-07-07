@@ -4,7 +4,7 @@ import cors from "cors";
 
 import { corsOptions, isProd } from "~/config";
 import { greetingRouter, conversationRouter, utilRouter } from "./routes";
-
+console.log("code");
 const app = express();
 app.set("port", process.env.PORT || 3030);
 const port = app.get("port");
