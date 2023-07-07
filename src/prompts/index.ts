@@ -131,15 +131,7 @@ export const getRelatedQuestionPrompt_backup = ({ user }: Props) => {
   return { prompt };
 };
 
-export const getRelatedQuestionPrompt = ({ user }: Props) => {
-  const contextualizedData = previousData
-    .map((data) => {
-      return `Pablo Picasso: ${data.ai}, Student: ${data.user} \n`;
-    })
-    .join("");
-
-  console.log("contextualizedData🔥🔥", contextualizedData);
-
+export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
   // const prompt = `This is an experiment. "context:" are the results from the previous experiment.
   // "user:" can you check if there are any values similar to context?
   // I'll give you an example.
@@ -168,45 +160,36 @@ export const getRelatedQuestionPrompt = ({ user }: Props) => {
   //   user:${user}
   //   `;
 
+  const stringContext = context.map((item) => {
+    return `I said ${item.ai}. My friend replied ${item.human}.\n`;
+  });
+
   const prompt = `
-  [GOAL]
-  You're the Pablo Picasso who in midst of the conversation.
-  From following dialogue, generate a reply linking similar ideas to current answer of the student.
-  Generate a plain text without any format.
+    [TASK]
+    You're the young Pablo Picasso who's talking with the friend about your painting.
+    Reply to following friend's comment in [DATA] by linking it with the previous dialogue in [DIALOGUE].
+    Do not exceed more than one sentence. Start the sentence without introductory words. Do not generate question.
 
-  [DIALOGUE]
-  ${contextualizedData}
+    [DIALOGUE]
+    ${stringContext}
 
-  [CONVERSATION]
-  Student: ${user}
+    [DATA]
+    Comment: ${user}
   `;
   return { prompt };
 };
 
 export const getParaphrasePrompt = ({ user }: Props) => {
-  // const prompt = `The way to empathize with someone in a conversation is to repeat their words back to them and give them a short response,
-  // like "I'm not feeling well", "Really? You're not feeling well, get some rest",
-  // etc. answer "user:" under "---" in 50 characters or less in an empathetic way.
-  // If you don't have enough information to provide an empathetic response in this context.,
-  // don't say anything else and give an empty string "I didn't quite understand" as the answer.
-
-  //   - Tone: Polite
-  //   - Style: Concise (100 characters or less)
-  //   - Reader level: College students
-  //   - Length: One sentence
-  //   - Answer me in English
-  //   - Don't ask me any more questions.
-  //   ---
-  //   user:${user} \n
-  //   `;
   const prompt = `
     [TASK]
-    Assume that you're the Pablo Picasso who's instructing the student about your painting.
-    Generate a reply to following observation, yet only using a paraphrase with verbose expressions.
-    The idea is to convey that you're empathizing with student's observation. Do not exceed more than one sentence.
+    You're the young Pablo Picasso who's talking with the friend about your painting.
+    Generate a reply to following comment of the friend, using a paraphrase with vibrant and engaging expressions.
+    The idea is to convey that you're agreeing with friend's comment. Do not exceed more than one sentence.
+    Feel free to modify the sentence or provide a different one if you have a specific phrase or concept you'd like to be paraphrased with rich expressions.
+    Start the sentence with opening paraphrase with acknowledgement.
     
     [DATA]
-    Observation: ${user}
+    Comment: ${user}
   `;
 
   return { prompt };
@@ -244,20 +227,19 @@ export const getAnswerWithVectorDBPrompt_backup = ({ context }: Props) => {
 
 export const getAnswerWithVectorDBPrompt = ({ user }: Props) => {
   const prompt = `
-  We're in a museum looking at Pablo Picasso's painting Guernica, 
-  and you're the young Picasso. For a natural conversation, 
-  speak once and wait for the next answer.
-  Answer "user:" sentence under "---" 
+  [TASK]
+  You're the young Pablo Picasso who's talking to your friend about your painting the Guernica.
+  Generate an answer to the following friend's question inside the commment.
+  Do not include phrases such as 'Comment:' in the generated text.
 
-
-  ---
-  user:${user}
+  [DATA]
+  Comment: ${user}
   `;
   return { prompt };
 };
 
 // TODO : refine
-export const getAdditionalQuestionPrompt = ({ context }: Props) => {
+export const getAdditionalQuestionPrompt = ({ previousQuestion, user }: Props) => {
   // const prompt = `
   // See "Sentence 1 :" under "---".
   // Sentence 1: is a record of all the conversations we've had, which we'll call context.
@@ -274,23 +256,16 @@ export const getAdditionalQuestionPrompt = ({ context }: Props) => {
   // ---
   // context:${context}
   // `;
-  const textContext = context
-    .map((item) => {
-      return `Pablo Picasso: ${item.ai}, Student: ${item.human} \n`;
-    })
-    .join("");
-
-  console.log("textContext🔥🔥🔥", textContext);
-
   const prompt = `
     [TASK]
-    You're an Pablo Picasso working as an art teacher, who is currently advising the student about your painting Guernica.
-    Given following [DIALOGUE], generate a question that can clarify students idea about the painting.
-    The idea is to help student generate one's own understanding of the painting. Do not exceed more than one sentence.
+    You're the Pablo Picasso who's instructing the friend's visual thinking about your painting the Guernica.
+    Reply with a open-ended question that relates to following comment of the friend.
+    The idea is to help friend visually think about the painting. Do not exceed more than one sentence.
+    Do not include phrases 'Question:' in the generated text.
     
-    [DIALOGUE]
-    ${textContext}
+    [DATA]
+    Your Previous Reply: ${previousQuestion}
+    Comment: ${user}
   `;
-
   return { prompt };
 };

@@ -47,7 +47,15 @@ interface getAgentFullSentenceProps {
 
 export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFullSentenceProps) => {
   let agent = "";
-  const isQuestion = result?.[0];
+  // 응답이 잘못 생성되는 경우를 고려하여 default value 지정
+  const isQuestion = (() => {
+    try {
+      return result?.[0].isQuestion;
+    } catch (e) {
+      return false;
+    }
+  })();
+
   const isAnswer = result?.[1];
   // TODO : regenerate answer for final experiment?
   if (isQuestion) {
@@ -67,21 +75,25 @@ export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFu
   // const regex = /Picasso:\s(.+)/;
   // const answer = result?.[4]?.text?.match(regex)?.[1];
   const relatedQuestion = result?.[3]?.text;
-  const answer = result?.[4].text;
+  const answer = isQuestion ? result?.[4].text : "";
+  const addiontionalQuestion = result?.[5] ? result?.[5]?.text : "";
 
-  agent += paraphrased;
-  agent += !!relatedQuestion && `Someone had a similar answer before.`;
-  agent += answer;
+  agent += paraphrased + " ";
+  agent += relatedQuestion + " ";
+  // agent += !!relatedQuestion && `Someone had a similar answer before.`;
+  agent += answer + " ";
+  agent += addiontionalQuestion;
 
-  console.log("result : ", result);
-  console.log("paraphrased :", paraphrased);
-  console.log("relatedQuestion :", relatedQuestion);
-  console.log("answer", answer);
+  console.log("■■■■■■■■■[GENERATION RESULT]■■■■■■■■■\n", result);
+  console.log("■■■■■■■■■[PARAPHRASE RESULT]■■■■■■■■■\n", paraphrased);
+  console.log("■■■■■■■■■[LINKING RESULT]■■■■■■■■■\n", relatedQuestion);
+  isQuestion && console.log("■■■■■■■■■[QUESTION ANSWER RESULT]■■■■■■■■■\n", answer);
+  addiontionalQuestion && console.log("■■■■■■■■■[ADDITIONAL QUESTION RESULT]■■■■■■■■■\n", addiontionalQuestion);
 
   if (secondVTS) agent += MESSAGE.VTS_TWO_EN;
   if (thirdVTS) agent += MESSAGE.VTS_THREE_EN;
 
-  console.log("최종 결과", agent);
+  console.log("■■■■■■■■■[FINAL RESULT]■■■■■■■■■\n", agent);
 
   return { agent };
 };
@@ -151,7 +163,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
     // LLM init
     const chainWithVectorDB = await chainInitializer({});
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
@@ -190,7 +202,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
@@ -230,11 +242,11 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     // LLM init
     const chainWithVectorDB = await chainInitializer({ type: CHAIN_INIT_TYPE.VECTOR });
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user });
-    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user });
+    const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ context, user });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
       user,
     });
-    const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ context });
+    const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ previousQuestion, user });
 
     const result = await Promise.all([
       getIsQuestion({ sentences: user }),
@@ -245,46 +257,47 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) }),
     ]);
 
-    console.log("여기까지 확인1", result);
+    // [잦은 오류 발생으로 주석 처리]
+    // console.log("여기까지 확인1", result);
 
     // TODO : Add logic
     //console.log("🔥🔥 질문이 있는지 확인 🔥🔥 \n", result[4]);
     //console.log("🔥🔥 답변을 했는지 확인 🔥🔥\n ", result[5]);
 
-    let additionalQuestion = result?.[5].text; // actual data
+    // let additionalQuestion = result?.[5].text; // actual data
 
-    console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
-    console.log("\n");
+    // console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
+    // console.log("\n");
 
-    let again = 0;
-    while (true) {
-      let sourceSentence;
-      if (!!again) {
-        sourceSentence = (await chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) })).text;
-        console.log(` 🔥🔥${again} 번째 유사도 검증 루프 시작 🔥🔥 \n `);
-      } else sourceSentence = additionalQuestion;
-      const [similarity] = await getSimilarityWithVTS({
-        type: SIMILARITY_TYPE.WITH_VTS_TWO,
-        sourceSentence,
-      });
-      console.log("🔥🔥 similarity 🔥🔥\n", similarity);
-      console.log("\n");
-      if (similarity > 0.9 && !again) {
-        again += 1;
-        continue;
-      } else {
-        additionalQuestion = sourceSentence;
-        break;
-      }
-    }
-    console.log("여기까지 확인2", result);
+    // let again = 0;
+    // while (true) {
+    //   let sourceSentence;
+    //   if (!!again) {
+    //     sourceSentence = (await chainWithVectorDB.call({ query: JSON.stringify(additionalQuestionPrompt) })).text;
+    //     console.log(` 🔥🔥${again} 번째 유사도 검증 루프 시작 🔥🔥 \n `);
+    //   } else sourceSentence = additionalQuestion;
+    //   const [similarity] = await getSimilarityWithVTS({
+    //     type: SIMILARITY_TYPE.WITH_VTS_TWO,
+    //     sourceSentence,
+    //   });
+    //   console.log("🔥🔥 similarity 🔥🔥\n", similarity);
+    //   console.log("\n");
+    //   if (similarity > 0.9 && !again) {
+    //     again += 1;
+    //     continue;
+    //   } else {
+    //     additionalQuestion = sourceSentence;
+    //     break;
+    //   }
+    // }
+    // console.log("여기까지 확인2", result);
 
-    console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
-    console.log("\n");
+    // console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
+    // console.log("\n");
 
     const { agent } = getAgentFullSentence({ result: result as any });
-    console.log("최종 답", agent);
-    console.log("유사 질문", additionalQuestion);
+    // console.log("최종 답", agent);
+    // console.log("유사 질문", additionalQuestion);
     context[context.length - 1].ai = agent;
     await redisClient.set(`context:${sessionID}`, JSON.stringify(context));
 
