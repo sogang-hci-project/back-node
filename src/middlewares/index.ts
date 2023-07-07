@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { redisClient } from "~/lib/redis";
-import { deeplTranslate } from "~/lib";
+import { deeplTranslate, papagoTranslate } from "~/lib";
 
 export const isSessionInit = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -55,9 +55,17 @@ export const initTranslation = async (req: Request, res: Response, next: NextFun
     if (req.url !== "/greeting/0" && !user) return res.status(400).json({ message: "incorrect data" });
 
     if (lang === "ko") {
-      res.locals.translatedText = await deeplTranslate(user, lang);
+      const candidates = await Promise.allSettled<{ value: string }>([
+        await deeplTranslate(user, "ko"),
+        await papagoTranslate(user, "ko"),
+      ]);
+      const fufilled = candidates.filter((res) => res.status === "fulfilled");
+      res.locals.translatedText = fufilled[0].status === "fulfilled" ? fufilled[0].value : "I don't understand";
       res.locals.original = user;
-      console.log("미들웨어 : 한글 -> 영어 ");
+      console.log("■■■■■■■■■[MIDDLEWARE - TRANSLATION RESULT: 한글 -> 영어]■■■■■■■■■");
+      console.log("[번역 API]:", fufilled.length === 2 ? "DEEPL" : "PAPAGO");
+      console.log("[번역 전]:", user);
+      console.log("[번역 후]:", res.locals.translatedText);
       next();
     } else {
       next();
@@ -80,9 +88,16 @@ export const finalTranslation = async (req: Request, res: Response, next: NextFu
 
     if (lang === "ko") {
       const { agent } = data.contents;
-      const result = await deeplTranslate(agent, "en");
-      data.contents.agent = result;
-      console.log("미들웨어 : 한글 -> 영어 ");
+      const candidates = await Promise.allSettled([
+        await deeplTranslate(agent, "en"),
+        await papagoTranslate(agent, "en"),
+      ]);
+      const fufilled = candidates.filter((res) => res.status === "fulfilled");
+      data.contents.agent = fufilled[0].status === "fulfilled" ? fufilled[0].value : "다시 한번 말해주시겠어요?";
+      console.log("■■■■■■■■■[MIDDLEWARE - TRANSLATION RESULT: 영어 -> 한글]■■■■■■■■■");
+      console.log("[번역 API]:", fufilled.length === 2 ? "DEEPL" : "PAPAGO");
+      console.log("[번역 전]:", agent);
+      console.log("[번역 후]:", data.contents.agent);
     }
     return res.status(200).json({ message: "success", data });
   } catch (e) {
