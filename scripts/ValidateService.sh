@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd /home/ubuntu/back-node
+cd /home/ubuntu/deploy/back-node
 sudo pm2 kill
 sudo npm run start:pm2

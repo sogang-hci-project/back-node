@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/ubuntu/back-node
+cd /home/ubuntu/deploy/back-node
 sudo npm i
 sudo npm run build
 sudo cp -r src/datas/markdown dist/datas
