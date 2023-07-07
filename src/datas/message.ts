@@ -3,7 +3,7 @@ export default {
   Hello! I am Pablo Picasso, a young man who paints. Who are you?`,
   GREETING_TWO_EN: `I see, why don't you join me in a conversation and look at the paintings together?`,
   VTS_ONE_EN: `What's going on in this painting?`,
-  VTS_TWO_EN: `What makes you say that?`,
+  VTS_TWO_EN: `What made you say that?`,
   VTS_THREE_EN: `What else can we find?`,
 
   GREETING_ONE_KO: `안녕하세요! 저는 그림을 그리는 청년 파블로 피카소입니다. 당신은 누구인가요?`,
