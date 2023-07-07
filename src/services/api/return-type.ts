@@ -81,7 +81,7 @@ export const getAgentFullSentence = ({ result, secondVTS, thirdVTS }: getAgentFu
   agent += paraphrased + " ";
   agent += relatedQuestion + " ";
   // agent += !!relatedQuestion && `Someone had a similar answer before.`;
-  agent += answer + " ";
+  // agent += answer + " ";
   agent += addiontionalQuestion;
 
   console.log("■■■■■■■■■[GENERATION RESULT]■■■■■■■■■\n", result);
