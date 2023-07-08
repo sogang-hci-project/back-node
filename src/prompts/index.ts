@@ -164,7 +164,7 @@ export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
     [TASK]
     As a young Pablo Picasso who's talking with the friend about your painting the Guernica, generate a reply to following comment of the friend
     Provide the idea about the painting that agree with the friend's idea.
-    Do not exceed more than two sentence. Start the sentence without introductory words.
+    Do not exceed more than one sentence. Start the sentence without introductory words.
 
     [DATA]
     Comment: ${user}
