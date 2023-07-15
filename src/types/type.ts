@@ -8,4 +8,5 @@ export enum CHAIN_INIT_TYPE {
   QUESTION = "QUESTION", // find question
   ANSWER = "ANSWER", // check a user answers about ai's previous question
   VECTOR = "VECTOR",
+  COMBINE = "COMBINE",
 }

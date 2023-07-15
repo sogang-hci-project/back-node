@@ -5,10 +5,19 @@ import { PromptTemplate } from "langchain/prompts";
 
 import { OPENAI_API_KEY as openAIApiKey } from "~/constants";
 import loadVectorStore from "~/lib/langchain/load-local-db";
-import { getIsQuestionPrompt, getIsAnsweredPrompt, freeTalkTemplatePrompt } from "~/prompts";
-import { CHAIN_INIT_TYPE } from "~/types";
+import {
+  getIsQuestionPrompt,
+  getIsAnsweredPrompt,
+  freeTalkTemplatePrompt,
+  defaultTemplatePrompt,
+  combineMessagesPrompt,
+} from "~/prompts";
 
-export const llm = new ChatOpenAI({
+/////////////////////////
+/// MODEL DECLARATION ///
+/////////////////////////
+
+export const chatGPT = new ChatOpenAI({
   temperature: 0, // 0 is best for chat bot
   openAIApiKey,
   verbose: false,
@@ -22,39 +31,60 @@ export const llm = new ChatOpenAI({
   ],
 });
 
-interface Props {
-  type?: CHAIN_INIT_TYPE;
-  sentences?: string;
+/////////////////////////////
+/// GET CHAIN DECLARATION ///
+/////////////////////////////
+
+interface defaultChainInput {
+  query: string;
 }
 
-export async function chainInitializer({ type, sentences }: Props) {
-  const vectorStore = await loadVectorStore();
-  let chain;
+export async function getDefaultChain() {
+  const { template } = defaultTemplatePrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["query"],
+  });
+  return new LLMChain<defaultChainInput>({ llm: chatGPT, prompt });
+}
 
-  if (type === CHAIN_INIT_TYPE.FREE) {
-    const { template } = freeTalkTemplatePrompt();
-    const prompt = new PromptTemplate({
-      template,
-      inputVariables: ["user"],
-    });
-    chain = new LLMChain({ llm, prompt });
-  } else if (type === CHAIN_INIT_TYPE.QUESTION) {
-    const { template } = getIsQuestionPrompt();
-    const prompt = new PromptTemplate({
-      template,
-      inputVariables: ["sentences"],
-    });
-    chain = new LLMChain({ llm, prompt });
-  } else if (type === CHAIN_INIT_TYPE.ANSWER) {
-    const { template } = getIsAnsweredPrompt({ previousQuestion: sentences });
-    const prompt = new PromptTemplate({
-      template,
-      inputVariables: ["sentences"],
-    });
-    chain = new LLMChain({ llm, prompt });
-  } else {
-    // using Vector Store
-    chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
-  }
-  return chain;
+export async function getCombineMessageChain() {
+  const { template } = combineMessagesPrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["answer", "paraphrase", "link", "question", "context"],
+  });
+  return new LLMChain<defaultChainInput>({ llm: chatGPT, prompt });
+}
+
+export async function getFreeChain() {
+  const { template } = freeTalkTemplatePrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["user"],
+  });
+  return new LLMChain({ llm: chatGPT, prompt });
+}
+
+export async function getQuestionDiscriminatorChain() {
+  const { template } = getIsQuestionPrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["sentences"],
+  });
+  return new LLMChain({ llm: chatGPT, prompt });
+}
+
+export async function getResponseDiscriminatorChain() {
+  const { template } = getIsAnsweredPrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["sentences", "previousQuestion"],
+  });
+  return new LLMChain({ llm: chatGPT, prompt });
+}
+
+export async function getVectorStoreAnswerChain() {
+  const vectorStore = await loadVectorStore();
+  return RetrievalQAChain.fromLLM(chatGPT, vectorStore.asRetriever());
 }

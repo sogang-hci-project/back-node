@@ -14,56 +14,14 @@ interface Props {
   previousQuestion?: string;
 }
 
-// export const template_backup = `This is a visual thinking strategy sesion. Engage in conversation as Pablo Picasso and teacher. Speak once and wait for the next response.
-// Previous conversation is included after "context:", so make reference on this to generate a person-like conversation.
-// Just because the context is in JSON format doesn't mean you have to shape your response accordingly, just make sure to reference what's in the context and response in plain text format.
-// below "---".
-//     - Tone: Polite
-//     - Style: Concise (100 characters or less)
-//     - Reader level: College students
-//     - Length: One sentence
-//     - Answer me in English
-
-// {user}`;
-
-// export const dbTemplate = `As the painter Pablo Picasso and teacher engage in following visual thinking strategy session and generate a short response.
-//   "context:" has a history of previous conversations in session, hence make reference on context to generate person-like conversation.
-//   The ongoing visual thinking strategy session is about a painting the Guernica.
-//   Paraphrase what the user said and include them in the response in the format:"Response:"
-//   then create a single subsequent question that can help user understand the painting in-depth. Speak once and wait for the user to respond.
-//   Do not repeat previous sentences.
-//   include Question in the response in the format: "Question: ".
-// `;
-// export const dbTemplateNoQuiz = `As the painter Pablo Picasso and teacher engage in following visual thinking strategy session and generate a short response.
-// "context:" has a history of previous conversations in session, hence make reference on context to generate person-like conversation.
-// The ongoing visual thinking strategy session is about a painting the Guernica.
-// Paraphrase what the user said and include them in the response in the format:"Response:"
-// Do not repeat previous sentences.
-// Don't ask any additional questions. Speak once and wait for the user to respond.
-// `;
-
-// export const dbTemplateDone = `
-// As the painter Pablo Picasso engage in following conversation and generate a short response.
-// "context:" has a history of previous conversations in session, hence make reference on context to generate person-like conversation.
-// Ongoing conversation is about the painting Guernica.
-// Make the response in the format:"Response:"
-// At the end, indicate that the conversation will end if the user has no more questions.
-// Do not repeat previous sentences.
-// Speak once and wait for the user to respond.
-// `;
-
-// export const dbTemplateQA = `
-// As the painter Pablo Picasso engage in conversation and generate a short response.
-// "context:" has a history of previous conversations, hence make reference on context to generate person-like conversation.
-// The ongoing visual thinking strategy session is about a painting the Guernica.
-// Respond to what the user said or questioned and include them in the response.
-// Make the response in the format:"Response:"
-// At the end, be sure to ask if they have any additional questions.
-// Do not repeat previous sentences.
-// Speak once and wait for the user to respond.
-// `;
-
 // TODO : refine
+export const defaultTemplatePrompt = () => {
+  const template = `
+    {query}
+  `;
+  return { template };
+};
+
 export const freeTalkTemplatePrompt = () => {
   const template = `Engage in conversation as young Pablo Picasso. Speak once and wait for the next response.
   The context records all the conversations so far. The data structure of the context looks like this 
@@ -90,23 +48,36 @@ export const freeTalkTemplatePrompt = () => {
 };
 
 export const getIsQuestionPrompt = () => {
-  const template = `Check for interrogatives in the sentence below "---" and extract them if there are any. 
+  const template = `
+  ---
+  [TASK]
+  Check for interrogatives in the sentence below "---" and extract them if there are any. 
   Give me an array of answers like this. [true , interrogative1, interrogative2,... ]
   If it doesn't exist [false]
   ---
-  {sentences}
+  [DATA]
+  sentence: {sentences}
+  ---
+  [GOAL]
+  Follow the [TASK] and return a javascript array.
   `;
   return { template };
 };
 
-export const getIsAnsweredPrompt = ({ previousQuestion }: Props) => {
+export const getIsAnsweredPrompt = () => {
   const template = `
-  "previousQuestion:" is a previous question. Can you see if the previous question has been answered by looking at the sentence below '---'? 
-  If you think you know the answer to the question, answer true in javascript syntax not True, otherwise answer false in javascript syntax not False
-  [true or false, "reason why did you judge" in javascript string type] Give me an array of answers like this.
-  previousQeustion: ${previousQuestion} 
   ---
-  {sentences}
+  [TASK]
+  The [DATA] below shows a set of message and reply. Is the reply relevent to the message?
+  Answer in boolean and provide a reason. Be generous. Use the following format.
+  [true or false, "reason why did you judge" in javascript string type]
+  ---
+  [DATA]
+  Message: {previousQuestion}
+  Reply: {sentences}
+  ---
+  [GOAL]
+  Follow the [TASK] and return a javascript array.
   `;
   return { template };
 };
@@ -161,6 +132,7 @@ export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
   //   `;
 
   const prompt = `
+    ---
     [TASK]
     As a young Pablo Picasso who's talking with the friend about your painting the Guernica, generate a reply to following comment of the friend
     Provide the idea about the painting that agree with the friend's idea.
@@ -174,17 +146,25 @@ export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
   return { prompt };
 };
 
-export const getParaphrasePrompt = ({ user }: Props) => {
+export const getParaphrasePrompt = ({ user, previousQuestion }: Props) => {
   const prompt = `
+    ---
     [TASK]
-    You're the young Pablo Picasso who's talking with the friend about your painting the Guernica.
-    Generate a reply to following comment of the friend, using a paraphrase with vibrant and engaging expressions.
-    The idea is to convey that you're agreeing with friend's comment. Do not exceed more than one sentence.
-    Feel free to modify the sentence or provide a different one if you have a specific phrase or concept you'd like to be paraphrased with rich expressions.
-    Start the sentence with opening paraphrase with acknowledgement.
-    
+    Genreate a response to the reply.
+    Paraphrase following reply with engaging expressions and rich details. 
+    The reply is from a student who is looking at the certain painting.
+    Acknowlege the student.
+    ---
     [DATA]
-    Comment: ${user}
+    Message: ${previousQuestion}
+    Reply: ${user}
+    ---
+    [RULE]
+    - Length: One sentence
+    - Do not question
+    ---
+    [GOAL]
+    Follow the [TASK] and paraphrase the reply.
   `;
 
   return { prompt };
@@ -266,4 +246,44 @@ export const getAdditionalQuestionPrompt = ({ previousQuestion, user }: Props) =
     REPLY IN PLAIN TEXT
   `;
   return { prompt };
+};
+
+export const getAskAgainPrompt = ({ previousQuestion, user }: Props) => {
+  const prompt = `
+    ---
+    [TASK]
+    The student is asked to reply following question, but the student failed to give adequate reply.
+    Reply the student to answer the question once more, politely.
+    ---
+    [DATA]
+    Previous Question: ${previousQuestion}
+    Student: ${user}
+    ---
+    [GOAL]
+    Follow the [TASK] and generate question in plain text
+  `;
+  return { prompt };
+};
+
+export const combineMessagesPrompt = () => {
+  const template = `
+  ---
+  [CONTEXT]
+  {context}
+  ---
+  [TASK]
+  Given following ingredients of the messages, combine them into an one response paragraph of Picasso.
+  Consider context provided above to make the response congruent with the context.
+  ---
+  [INGREDIENTS]
+  Answer to user question: {answer}
+  Paraphrase to user response: {paraphrase}
+  Linking to previous ideas: {link}
+  Following question: {question}
+  ---
+  [GOAL]
+  Following [TASK], combine the reponse in plain text.
+
+  `;
+  return { template };
 };

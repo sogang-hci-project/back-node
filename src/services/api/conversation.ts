@@ -36,13 +36,13 @@ export const conversationZero = async ({ sessionID, session, lang, user }: Props
 
 export const conversationOne = async ({ sessionID, session, user }: Props) => {
   try {
+    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+
     const currentStage = "/conversation/1";
-    const nextStage = "/conversation/1-1";
+    const nextStage = isAnswered ? "/conversation/1-1" : currentStage;
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
-
-    const { agent } = await returnVTS_two({ sessionID, user });
 
     const contents = { agent };
 
@@ -54,13 +54,14 @@ export const conversationOne = async ({ sessionID, session, user }: Props) => {
 
 export const conversationTwo = async ({ sessionID, session, user }: Props) => {
   try {
+    const { agent, isAnswered } = await returnVTS_three({ sessionID, user });
+
     const currentStage = "/conversation/2";
-    const nextStage = "/conversation/3";
+    const nextStage = isAnswered ? currentStage : "/conversation/3";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnVTS_three({ sessionID, user });
     const contents = { agent };
 
     return { contents, currentStage, nextStage };
@@ -70,13 +71,14 @@ export const conversationTwo = async ({ sessionID, session, user }: Props) => {
 };
 export const conversationThree = async ({ sessionID, session, user }: Props) => {
   try {
+    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+
     const currentStage = "/conversation/3";
-    const nextStage = "/conversation/2-1";
+    const nextStage = isAnswered ? currentStage : "/conversation/2-1";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnVTS_two({ sessionID, user });
     const contents = { agent };
     return { contents, currentStage, nextStage };
   } catch (e) {
@@ -85,13 +87,14 @@ export const conversationThree = async ({ sessionID, session, user }: Props) => 
 };
 export const conversationFour = async ({ sessionID, session, user }: Props) => {
   try {
+    const { agent, isAnswered } = await returnVTS_three({ sessionID, user });
+
     const currentStage = "/conversation/4";
-    const nextStage = "/conversation/5";
+    const nextStage = isAnswered ? "/conversation/5" : currentStage;
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnVTS_three({ sessionID, user });
     const contents = { agent };
 
     return { contents, currentStage, nextStage };
@@ -102,13 +105,14 @@ export const conversationFour = async ({ sessionID, session, user }: Props) => {
 
 export const conversationFive = async ({ sessionID, session, user }: Props) => {
   try {
+    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+
     const currentStage = "/conversation/5";
-    const nextStage = "/conversation/3-1";
+    const nextStage = isAnswered ? "/conversation/3-1" : currentStage;
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnVTS_two({ sessionID, user });
     const contents = { agent };
 
     return { contents, currentStage, nextStage };
@@ -131,13 +135,14 @@ const getNextStage = (id: string) => {
 
 export const conversationLoop = async ({ sessionID, session, user, id }: Props) => {
   try {
+    const { agent, isAnswered } = await returnAdditionalQuestion({ sessionID, user });
+
     const currentStage = `/conversation/${id}`;
     const nextStage = `/conversation/${getNextStage(id)}`;
     session.user.currentStage = currentStage;
-    session.user.nextStage = nextStage;
+    session.user.nextStage = isAnswered ? nextStage : currentStage;
     updateSessionData(session, sessionID);
 
-    const { agent } = await returnAdditionalQuestion({ sessionID, user });
     const contents = { agent };
 
     return { contents, currentStage, nextStage };
