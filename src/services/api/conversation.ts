@@ -36,10 +36,10 @@ export const conversationZero = async ({ sessionID, session, lang, user }: Props
 
 export const conversationOne = async ({ sessionID, session, user }: Props) => {
   try {
-    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+    const { agent, isIrrelevant } = await returnVTS_two({ sessionID, user });
 
     const currentStage = "/conversation/1";
-    const nextStage = isAnswered ? "/conversation/1-1" : currentStage;
+    const nextStage = isIrrelevant ? currentStage : "/conversation/1-1";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -54,10 +54,10 @@ export const conversationOne = async ({ sessionID, session, user }: Props) => {
 
 export const conversationTwo = async ({ sessionID, session, user }: Props) => {
   try {
-    const { agent, isAnswered } = await returnVTS_three({ sessionID, user });
+    const { agent, isIrrelevant } = await returnVTS_three({ sessionID, user });
 
     const currentStage = "/conversation/2";
-    const nextStage = isAnswered ? currentStage : "/conversation/3";
+    const nextStage = isIrrelevant ? currentStage : "/conversation/3";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -71,10 +71,10 @@ export const conversationTwo = async ({ sessionID, session, user }: Props) => {
 };
 export const conversationThree = async ({ sessionID, session, user }: Props) => {
   try {
-    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+    const { agent, isIrrelevant } = await returnVTS_two({ sessionID, user });
 
     const currentStage = "/conversation/3";
-    const nextStage = isAnswered ? currentStage : "/conversation/2-1";
+    const nextStage = isIrrelevant ? currentStage : "/conversation/2-1";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -87,10 +87,10 @@ export const conversationThree = async ({ sessionID, session, user }: Props) => 
 };
 export const conversationFour = async ({ sessionID, session, user }: Props) => {
   try {
-    const { agent, isAnswered } = await returnVTS_three({ sessionID, user });
+    const { agent, isIrrelevant } = await returnVTS_three({ sessionID, user });
 
     const currentStage = "/conversation/4";
-    const nextStage = isAnswered ? "/conversation/5" : currentStage;
+    const nextStage = isIrrelevant ? currentStage : "/conversation/5";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -105,10 +105,10 @@ export const conversationFour = async ({ sessionID, session, user }: Props) => {
 
 export const conversationFive = async ({ sessionID, session, user }: Props) => {
   try {
-    const { agent, isAnswered } = await returnVTS_two({ sessionID, user });
+    const { agent, isIrrelevant } = await returnVTS_two({ sessionID, user });
 
     const currentStage = "/conversation/5";
-    const nextStage = isAnswered ? "/conversation/3-1" : currentStage;
+    const nextStage = isIrrelevant ? currentStage : "/conversation/3-1";
     session.user.currentStage = currentStage;
     session.user.nextStage = nextStage;
     updateSessionData(session, sessionID);
@@ -135,12 +135,12 @@ const getNextStage = (id: string) => {
 
 export const conversationLoop = async ({ sessionID, session, user, id }: Props) => {
   try {
-    const { agent, isAnswered } = await returnAdditionalQuestion({ sessionID, user });
+    const { agent, isIrrelevant } = await returnAdditionalQuestion({ sessionID, user });
 
     const currentStage = `/conversation/${id}`;
     const nextStage = `/conversation/${getNextStage(id)}`;
     session.user.currentStage = currentStage;
-    session.user.nextStage = isAnswered ? nextStage : currentStage;
+    session.user.nextStage = isIrrelevant ? nextStage : currentStage;
     updateSessionData(session, sessionID);
 
     const contents = { agent };

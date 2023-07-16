@@ -7,10 +7,11 @@ import { OPENAI_API_KEY as openAIApiKey } from "~/constants";
 import loadVectorStore from "~/lib/langchain/load-local-db";
 import {
   getIsQuestionPrompt,
-  getIsAnsweredPrompt,
+  getIsIrrelevantPrompt,
   freeTalkTemplatePrompt,
   defaultTemplatePrompt,
   combineMessagesPrompt,
+  reasonStrategyPrompt,
 } from "~/prompts";
 
 /////////////////////////
@@ -45,16 +46,16 @@ export async function getDefaultChain() {
     template,
     inputVariables: ["query"],
   });
-  return new LLMChain<defaultChainInput>({ llm: chatGPT, prompt });
+  return new LLMChain({ llm: chatGPT, prompt });
 }
 
 export async function getCombineMessageChain() {
   const { template } = combineMessagesPrompt();
   const prompt = new PromptTemplate({
     template,
-    inputVariables: ["answer", "paraphrase", "link", "question", "context"],
+    inputVariables: ["answer", "paraphrase", "link", "question", "context", "strategy"],
   });
-  return new LLMChain<defaultChainInput>({ llm: chatGPT, prompt });
+  return new LLMChain({ llm: chatGPT, prompt });
 }
 
 export async function getFreeChain() {
@@ -76,7 +77,7 @@ export async function getQuestionDiscriminatorChain() {
 }
 
 export async function getResponseDiscriminatorChain() {
-  const { template } = getIsAnsweredPrompt();
+  const { template } = getIsIrrelevantPrompt();
   const prompt = new PromptTemplate({
     template,
     inputVariables: ["sentences", "previousQuestion"],
@@ -87,4 +88,13 @@ export async function getResponseDiscriminatorChain() {
 export async function getVectorStoreAnswerChain() {
   const vectorStore = await loadVectorStore();
   return RetrievalQAChain.fromLLM(chatGPT, vectorStore.asRetriever());
+}
+
+export async function getStrategyReasoningChain() {
+  const { template } = reasonStrategyPrompt();
+  const prompt = new PromptTemplate({
+    template,
+    inputVariables: ["context", "user"],
+  });
+  return new LLMChain({ llm: chatGPT, prompt });
 }

@@ -64,13 +64,14 @@ export const getIsQuestionPrompt = () => {
   return { template };
 };
 
-export const getIsAnsweredPrompt = () => {
+export const getIsIrrelevantPrompt = () => {
   const template = `
   ---
   [TASK]
-  The [DATA] below shows a set of message and reply. Is the reply relevent to the message?
-  Answer in boolean and provide a reason. Be generous. Use the following format.
-  [true or false, "reason why did you judge" in javascript string type]
+  The [DATA] below shows a set of message and reply. 
+  Is the reply irrelevant to message?
+  Answer in boolean and provide a reason. Use the following format.
+  [true or false, "reason why did you judge", relevance score from 0 to 1]
   ---
   [DATA]
   Message: {previousQuestion}
@@ -150,7 +151,7 @@ export const getParaphrasePrompt = ({ user, previousQuestion }: Props) => {
   const prompt = `
     ---
     [TASK]
-    Genreate a response to the reply.
+    Genreate a response to the reply with paraphrase.
     Paraphrase following reply with engaging expressions and rich details. 
     The reply is from a student who is looking at the certain painting.
     Acknowlege the student.
@@ -161,7 +162,7 @@ export const getParaphrasePrompt = ({ user, previousQuestion }: Props) => {
     ---
     [RULE]
     - Length: One sentence
-    - Do not question
+    - Do not add question
     ---
     [GOAL]
     Follow the [TASK] and paraphrase the reply.
@@ -272,18 +273,45 @@ export const combineMessagesPrompt = () => {
   {context}
   ---
   [TASK]
-  Given following ingredients of the messages, combine them into an one response paragraph of Picasso.
-  Consider context provided above to make the response congruent with the context.
+  Generate response of picasso only using sentences in the [BLOCKS].
+  Consider [CONTEXT] provided above to make the response congruent within the context.
+  Generate most efficient response based on [STRAEGY] and feel free to modify the sentence.
   ---
-  [INGREDIENTS]
+  [STATEGY]
+  {strategy}
+  ---
+  [BLOCKS]
   Answer to user question: {answer}
   Paraphrase to user response: {paraphrase}
   Linking to previous ideas: {link}
   Following question: {question}
   ---
   [GOAL]
-  Following [TASK], combine the reponse in plain text.
-
+  Following [TASK], generate a reponse in plain text.
   `;
+  return { template };
+};
+
+export const reasonStrategyPrompt = () => {
+  const template = `
+  ---
+  [CONTEXT]
+  {context}
+  ---
+  [TASK]
+  Given the context, make analysis on student and provide art pedagogic response strategy
+  to respond to the student's message.
+  ---
+  [DATA]
+  message: {user}
+  ---
+  [RULE]
+  - Do not generate actual response.
+  - Length: Maximum 3 sentences.
+  ---
+  [GOAL]
+  Generate a response strategy on student based on the [TASK]. 
+  `;
+
   return { template };
 };
