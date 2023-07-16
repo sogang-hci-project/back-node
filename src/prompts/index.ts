@@ -104,34 +104,6 @@ export const getRelatedQuestionPrompt_backup = ({ user }: Props) => {
 };
 
 export const getRelatedQuestionPrompt = ({ user, context }: Props) => {
-  // const prompt = `This is an experiment. "context:" are the results from the previous experiment.
-  // "user:" can you check if there are any values similar to context?
-  // I'll give you an example.
-  // If "context: ["I like flower", "I like dog", "I like food"]", "user: "I like pet",
-  // then the similarity to the current user's answer is I like dog, because I like dog before.
-  // "context:" and "user:" are located below the "---".
-
-  // Let's talk about the data type of "context:".
-  // It's [{id:number, user:string, ai:string}, ... ] and
-  // it's the user:string part where you should look for similar questions.
-
-  // Adhere to the options below.
-  // If similar answers exist,
-  // give an array of the form [true, similar answer1, similar answer2, ...] for any number of them.
-  // If no similar answers exist, give [false, "nothing"].
-
-  //   - Tone: Polite
-  //   - Style: Concise (100 characters or less)
-  //   - Reader level: College students
-  //   - Length: One sentence
-  //   - Answer me in English
-  //   - Don't ask me any more questions.
-  //   - If you don't have anything relevant, don't answer.
-  //   ---
-  //   context:${previousData} \n
-  //   user:${user}
-  //   `;
-
   const prompt = `
     ---
     [TASK]
@@ -235,16 +207,21 @@ export const getAdditionalQuestionPrompt = ({ previousQuestion, user }: Props) =
   // context:${context}
   // `;
   const prompt = `
+    ---
     [TASK]
-    You're the Pablo Picasso who's instructing the visual thinking strategy session to friend about your painting the Guernica.
-    Reply with a open-ended question regarding visual thinking to following comment of the friend and previous reply of yourself.
-    Do not exceed more than one sentence. Do not include phrases 'Question:' in the generated text.
-    
+    Generate a subsequent art pedagogical question to student's reply.
+    The goal of question is to expand student's understanding about the painting.
+    ---
+    [RULE]
+    - Length: One sentence
+    - Do not include "Question:"
+    ---
     [DATA]
-    Your Previous Reply: ${previousQuestion}
-    Comment: ${user}
-
-    REPLY IN PLAIN TEXT
+    Message: ${previousQuestion}
+    Reply: ${user}
+    ---
+    [GOAL]
+    Generate a question following the [TASK].
   `;
   return { prompt };
 };
@@ -273,11 +250,11 @@ export const combineMessagesPrompt = () => {
   {context}
   ---
   [TASK]
-  Generate response of picasso only using sentences in the [BLOCKS].
+  Generate response of picasso by freely modifying the sentences in the [BLOCKS].
   Consider [CONTEXT] provided above to make the response congruent within the context.
-  Generate most efficient response based on [STRAEGY] and feel free to modify the sentence.
+  Adhere to [RESPONSE STRAEGY] provided when generating the response.
   ---
-  [STATEGY]
+  [RESPONSE STATEGY]
   {strategy}
   ---
   [BLOCKS]
