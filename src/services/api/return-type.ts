@@ -167,6 +167,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
 
     // LLM init
     const chain = await CustomChain.getDefaultChain();
+    const QAchain = await CustomChain.getVectorStoreAnswerChain();
     const reasoningChain = await CustomChain.getStrategyReasoningChain();
 
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
@@ -189,7 +190,7 @@ export const returnVTS_two = async ({ sessionID, user }: Props) => {
       getIsIrrelevant({ previousQuestion, reply }),
       chain.call({ query: JSON.stringify(paraphrasePrompt) }),
       chain.call({ query: JSON.stringify(relatedQuestionPrompt) }),
-      chain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
+      QAchain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
       chain.call({ query: JSON.stringify(askAgainPrompt) }),
       reasoningChain.call({ context: textContext, user }),
     ]);
@@ -243,6 +244,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
     // LLM init
     const chain = await CustomChain.getDefaultChain();
     const reasoningChain = await CustomChain.getStrategyReasoningChain();
+    const QAchain = await CustomChain.getVectorStoreAnswerChain();
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user, previousQuestion });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -263,7 +265,7 @@ export const returnVTS_three = async ({ sessionID, user }: Props) => {
       getIsIrrelevant({ previousQuestion, reply }),
       chain.call({ query: JSON.stringify(paraphrasePrompt) }),
       chain.call({ query: JSON.stringify(relatedQuestionPrompt) }),
-      chain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
+      QAchain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
       chain.call({ query: JSON.stringify(askAgainPrompt) }),
       reasoningChain.call({ context: textContext, user }),
     ]);
@@ -316,6 +318,8 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     // LLM init
     const chain = await CustomChain.getDefaultChain();
     const reasoningChain = await CustomChain.getStrategyReasoningChain();
+    const QAchain = await CustomChain.getVectorStoreAnswerChain();
+
     const { prompt: paraphrasePrompt } = getParaphrasePrompt({ user, previousQuestion });
     const { prompt: relatedQuestionPrompt } = getRelatedQuestionPrompt({ user, previousQuestion });
     const { prompt: answerWithVectorDBPrompt } = getAnswerWithVectorDBPrompt({
@@ -323,44 +327,6 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     });
     const { prompt: additionalQuestionPrompt } = getAdditionalQuestionPrompt({ user, previousQuestion });
     const { prompt: askAgainPrompt } = getAskAgainPrompt({ user, previousQuestion });
-
-    // [잦은 오류 발생으로 주석 처리]
-    // console.log("여기까지 확인1", result);
-
-    // TODO : Add logic
-    //console.log("🔥🔥 질문이 있는지 확인 🔥🔥 \n", result[4]);
-    //console.log("🔥🔥 답변을 했는지 확인 🔥🔥\n ", result[5]);
-
-    // let additionalQuestion = result?.[5].text; // actual data
-
-    // console.log("🔥🔥 유사도 검증 전 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
-    // console.log("\n");
-
-    // let again = 0;
-    // while (true) {
-    //   let sourceSentence;
-    //   if (!!again) {
-    //     sourceSentence = (await chain.call({ query: JSON.stringify(additionalQuestionPrompt) })).text;
-    //     console.log(` 🔥🔥${again} 번째 유사도 검증 루프 시작 🔥🔥 \n `);
-    //   } else sourceSentence = additionalQuestion;
-    //   const [similarity] = await getSimilarityWithVTS({
-    //     type: SIMILARITY_TYPE.WITH_VTS_TWO,
-    //     sourceSentence,
-    //   });
-    //   console.log("🔥🔥 similarity 🔥🔥\n", similarity);
-    //   console.log("\n");
-    //   if (similarity > 0.9 && !again) {
-    //     again += 1;
-    //     continue;
-    //   } else {
-    //     additionalQuestion = sourceSentence;
-    //     break;
-    //   }
-    // }
-    // console.log("여기까지 확인2", result);
-
-    // console.log("🔥🔥 유사도 검증 후 추가 질문 내용 확인🔥🔥 \n", additionalQuestion);
-    // console.log("\n");
 
     const [
       questionResult,
@@ -376,7 +342,7 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
       getIsIrrelevant({ previousQuestion, reply }),
       chain.call({ query: JSON.stringify(paraphrasePrompt) }),
       chain.call({ query: JSON.stringify(relatedQuestionPrompt) }),
-      chain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
+      QAchain.call({ query: JSON.stringify(answerWithVectorDBPrompt) }),
       chain.call({ query: JSON.stringify(additionalQuestionPrompt) }),
       chain.call({ query: JSON.stringify(askAgainPrompt) }),
       reasoningChain.call({ context: textContext, user }),
@@ -414,8 +380,3 @@ export const returnAdditionalQuestion = async ({ sessionID, user }: Props) => {
     console.error("🔥return additional question error🔥", e);
   }
 };
-
-// VTS_TWO_EN: `What else can you find in the painting?`,
-// let additionalQuestion = "What else can you find in the painting?"; // similarity is 1.00
-// let additionalQuestion = "What can you find in the paintings?"; // similarity is 0.88
-// let additionalQuestion = "What can you find in the city?"; // similarity is 0.45
